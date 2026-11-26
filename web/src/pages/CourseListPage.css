@@ -1,0 +1,16 @@
+/* Styles only for CourseListPage. Class names start with "course-list" so they don't clash with other pages. */
+
+.course-list {
+  list-style: none;
+  padding: 0;
+}
+
+.course-list__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border: 3px solid var(--pixel-ink);
+  background: #fff;
+}

@@ -1,0 +1,10 @@
+/* Global styles for the whole app. Colours/sizes come from variables.css (copied from Subapp 1). */
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--pixel-font);
+  color: var(--pixel-ink);
+  /* simple wall colour background until the pixel room (scene.css) is ported */
+  background: linear-gradient(var(--pixel-wall-top), var(--pixel-wall-bottom));
+}
