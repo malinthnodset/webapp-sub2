@@ -1,0 +1,14 @@
+namespace api.DAL;
+
+using api.Models;
+
+public interface IUserRepository
+{
+    Task<bool> Create(User user);
+    Task<bool> Update(User user);
+    Task<bool> Delete(int id);
+
+    // TODO: get user by id
+
+    // TODO: create actual user repository, not just interface
+}
