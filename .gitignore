@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+.NET build output
+bin/
+obj/
+
 # Fra subapp1
 **/wwwroot/lib
 **/bin/
