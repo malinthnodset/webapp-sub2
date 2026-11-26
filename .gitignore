@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Fra subapp1
+**/wwwroot/lib
+**/bin/
+**/obj/
+**/logs/
+.DS_Store
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
