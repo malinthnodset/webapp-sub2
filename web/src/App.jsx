@@ -3,7 +3,6 @@ import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
-import CreateQuiz from './quiz/CreateQuiz'
 import HomePage from './home/HomePage'
 
 // Main react component. Represents the root of the applications UI
