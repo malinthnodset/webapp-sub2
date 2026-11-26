@@ -26,3 +26,15 @@ dist-ssr
 .NET build output
 bin/
 obj/
+
+# Fra subapp1
+**/wwwroot/lib
+**/bin/
+**/obj/
+**/logs/
+.DS_Store
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
