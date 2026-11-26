@@ -1,0 +1,63 @@
+using Microsoft.EntityFrameworkCore;
+using api.DAL;
+using api.ViewModels;
+
+//Reads courses, quizzes, questions and the users attempts from the database through QuizDbContext,
+//and builds a DashboardViewModel for the DashboardController.
+
+namespace api.Services;
+
+public class DashboardService
+{
+    private readonly QuizDbContext _db;
+    //(constructor) stores the database context that the service uses to query data.
+    public DashboardService(QuizDbContext db) => _db = db;
+
+    //Loads all courses with their quizzes and questions, finds the users best percentage per quiz from their attempts, and maps everything into DashboardViewModel.
+    public async Task<DashboardViewModel> GetDashboardAsync(string? userId)
+    {
+        var courses = await _db.Courses
+            .AsNoTracking()
+            .Include(c => c.Quizzes)
+                .ThenInclude(q => q.Questions)
+            .ToListAsync();
+
+        var attemptsByQuiz = new Dictionary<int, int>();
+
+        // Best percentage per quiz for this user (best attempt counts)
+        var bestByQuiz = new Dictionary<int, double>();
+        if (int.TryParse(userId, out var studentId))
+        {
+            var attempts = await _db.QuizAttempts
+                .AsNoTracking()
+                .Include(a => a.Result)
+                .Where(a => a.StudentId == studentId && a.Result != null && a.Result.MaximumPoints > 0)
+                .ToListAsync();
+
+            bestByQuiz = attempts
+                .GroupBy(a => a.QuizId)
+                .ToDictionary(g => g.Key, g => g.Max(a => (double)a.Result!.Percentage));
+
+            attemptsByQuiz = attempts
+                .GroupBy(a => a.QuizId)
+                .ToDictionary(g => g.Key, g => g.Count());
+        }
+
+        return new DashboardViewModel
+        {
+            Courses = courses.Select(c => new CourseSummaryViewModel
+            {
+                Id = c.Id,
+                Title = c.Name,
+                Quizzes = c.Quizzes.Select(q => new QuizSummaryViewModel
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    QuestionCount = q.Questions.Count,
+                    BestPercentage = bestByQuiz.GetValueOrDefault(q.Id, 0),
+                    AttemptCount = attemptsByQuiz.GetValueOrDefault(q.Id, 0)
+                }).ToList()
+            }).ToList()
+        };
+    }
+}

@@ -1,0 +1,30 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace api.Models;
+
+// abstract class for shared attributed between student and teacher
+
+public abstract class User
+{
+    public int Id { get; set; } // set by DB
+
+    [Required(ErrorMessage = "Firstname cannot be empty")]
+    public string Name { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Email cannot be empyt"), EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    // password
+
+    [Required(ErrorMessage = "Choose a role")]
+    public Role Role { get; set; }
+
+    // TODO: include study program or faculty?
+    // TODO ? N:M relationship student-courses ?
+}
+
+public enum Role
+{
+    STUDENT,
+    TEACHER
+}
