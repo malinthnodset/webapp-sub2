@@ -48,9 +48,10 @@ public class QuizAPIController : ControllerBase
             QuizId = quiz.Id,
             Title = quiz.Title,
             Description = quiz.Description ?? string.Empty,
-            CourseId = quiz.Course.Id,
-            CourseName = quiz.Course.Name,
-            QuestionCount = quiz.Questions.Count
+            CourseId = quiz.CourseId,
+            //TODO Coursename and questioncount below cannot included yet bc include() not in repository
+            //CourseName = quiz.Course.Name,
+            //QuestionCount = quiz.Questions.Count
         });
         return Ok(quizDtos);
     }
