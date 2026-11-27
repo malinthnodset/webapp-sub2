@@ -45,10 +45,10 @@ public class QuizAPIController : ControllerBase
     
         var quizDtos = quizzes.Select(quiz => new QuizDto
         {
-            quizId = quiz.Id,
+            QuizId = quiz.Id,
             Title = quiz.Title,
-            Description = quiz.Description,
-            Course = quiz.Course.Id,
+            Description = quiz.Description ?? string.Empty,
+            CourseId = quiz.Course.Id,
             CourseName = quiz.Course.Name,
             QuestionCount = quiz.Questions.Count
         });
