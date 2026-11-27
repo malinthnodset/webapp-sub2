@@ -1,11 +1,13 @@
 //All the HTTP calls for quizzes and quiz attempts
 
-import { api } from './api';
+import { api, ApiError } from './api';
 import type { QuizDto, QuizForTakingDto, CreateQuizDto } from '../types/quiz';
 import type { SubmitQuizDto, QuizResultDto, AnswerFeedbackDto } from '../types/attempt';
 import { mockQuiz, mockCorrectAnswers } from '../mocks/quizMocks';
 
 const USE_MOCK = true; //TODO: set to false whenthe quiz endpoints exist in the API!!
+let lastMockResult: QuizResultDto | null = null;  // Remembers the last mock result, so the result page can be reloaded in mock mode
+//Since it is outside quizService, the last result is saved as long as the app is alive
 
 
 //Simulating an API call -> returns value after 300ms wrapped in a Promise
@@ -52,17 +54,23 @@ function mockGrade(data: SubmitQuizDto): QuizResultDto {
 
 export const quizService = {
   //taking a quiz as a Student
-  // GET /api/quizzes/{id}/take → the quiz with questions, without correct answers
+  // GET /api/quizzes/{id}/take: the quiz with questions, without correct answers
   getForTaking: (id: number): Promise<QuizForTakingDto> =>
     USE_MOCK ? delay(mockQuiz) : api.get<QuizForTakingDto>(`/quizzes/${id}/take`),
 
-  // POST /api/quizzes/{id}/attempts → creates a new attempt, the server grades it and returns the result
-  submit: (data: SubmitQuizDto): Promise<QuizResultDto> =>
-    USE_MOCK ? delay(mockGrade(data)) : api.post<QuizResultDto>(`/quizzes/${data.quizId}/attempts`, data),
+  // POST /api/quizzes/{id}/attempts: creates a new attempt, the server grades it and returns the result
+  submit: (data: SubmitQuizDto): Promise<QuizResultDto> => {  //saves the result before it returns
+    if (!USE_MOCK) return api.post<QuizResultDto>(`/quizzes/${data.quizId}/attempts`, data);
+    lastMockResult = mockGrade(data);
+    return delay(lastMockResult);
+  },
 
-  // GET /api/quizzes/{id}/results/latest → the student's latest result (used if the result page is reloaded)
-  getLatestResult: (quizId: number): Promise<QuizResultDto> =>
-    api.get<QuizResultDto>(`/quizzes/${quizId}/results/latest`),
+  // GET /api/quizzes/{id}/results/latest: the student's latest result (used if the result page is reloaded)
+  getLatestResult: (quizId: number): Promise<QuizResultDto> => {
+    if (!USE_MOCK) return api.get<QuizResultDto>(`/quizzes/${quizId}/results/latest`);
+    if (lastMockResult) return delay(lastMockResult);
+    return Promise.reject(new ApiError(404, 'You have not taken this quiz yet.'));
+  },
 
   // --- Managing quizzes (teacher) — used in step 6 and 7 ---
 
