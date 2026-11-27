@@ -19,18 +19,20 @@ namespace api.Controllers;
 public class QuizAPIController : ControllerBase
 {
     private readonly IQuizRepository _quizRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly ILogger<QuizAPIController> _logger;
 
-    public QuizAPIController(IQuizRepository quizRepository, ILogger<QuizAPIController> logger)
+    public QuizAPIController(IQuizRepository quizRepository, ICourseRepository courseRepository, ILogger<QuizAPIController> logger)
     {
         _quizRepository = quizRepository;
+        _courseRepository = courseRepository;
         _logger = logger;
     }
 
-   // Get ALL quizzes method
+   // GET: all quizzes (list)
    [HttpGet]
    public async Task<IActionResult> QuizList()
-    //TODO tidy comments
+    //TODO tidy these comments:
     // 1. ask the repo for all quizzes
     // 2. optional error handling 404
     // 3. turn each quiz into a quizDto
@@ -55,7 +57,59 @@ public class QuizAPIController : ControllerBase
         });
         return Ok(quizDtos);
     }
+
+    // CREATE QUIZ
+    [Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
+    [HttpPost] 
+    public async Task<IActionResult> Create([FromBody] CreateQuizDto createQuizDto)
+    {
+        var course = await _courseRepository.GetCourseById(createQuizDto.CourseId);
+        if (createQuizDto == null)
+        {
+            return BadRequest("Choose an existing course");
+        }
+        var newQuiz = new Quiz
+        {
+            Title = createQuizDto.Title,
+            Description = createQuizDto.Description,
+            CourseId = createQuizDto.CourseId,
+            //CreatedByUser = 1, // TODO can be added if wanted (nice2do)
+
+            //Convert each Create-Quiz-Question-Dto to Quiz-Question
+            Questions = createQuizDto.Questions.Select((q, i) => new QuizQuestion
+            {
+                Prompt = q.Prompt.Trim(),
+                CorrectAnswer = q.CorrectAnswer.Trim(),
+                Points = q.Points,
+                Order = i + 1
+            }).ToList()
+        };
+
+        bool returnOk = await _quizRepository.Create(newQuiz);
+        if (!returnOk)
+        {
+            _logger.LogWarning("QuizAPIController] Quiz creation failed {@quiz}", newQuiz);
+            return StatusCode(500, "Internal server error");
+        }
+
+        var quizDto = new QuizDto
+        {
+            QuizId = newQuiz.Id,
+            Title = newQuiz.Title,
+            Description = newQuiz.Description,
+            CourseId = newQuiz.CourseId,
+            CourseName = course.Name,
+            QuestionCount = newQuiz.Questions.Count
+        };
+        return Created($"/api/quizzes{newQuiz.Id}", quizDto);
+    }
+
 }
+
+
+
+
+/// Old controller ------------------------------
 
 //TODO bring back authorize (following demo 9 does this) 
 // [Authorize]//If the user tries to access the quiz page without being logged in, they get redirected to the Login-path; fail-safe default and complete mediation
