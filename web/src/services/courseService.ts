@@ -1,23 +1,34 @@
-// courseService — all HTTP calls for courses.
-// Components call these functions and never use fetch() or URLs directly
-// (this is the "client-side API service layer" from the requirements).
+// courseService — all HTTP requests for courses (Demo 8: ItemService.tsx).
+// Pages import it as   import * as courseService from '../services/courseService';
+// and only call functions like courseService.deleteCourse(id). They never use fetch() themselves.
+// Delete/create/update send the JWT token (getAuthHeaders), because the API only lets teachers do that.
 
-import { api } from './api';
-import type { CourseDto, CreateCourseDto } from '../types/course';
+import { API_URL, ApiError, getAuthHeaders, handleResponse, mockDelay } from './api';
+import type { CourseDto } from '../types/course';
 import { mockCourses } from '../mocks/courseMocks';
 
-const USE_MOCK = true; // TODO: set to false when CourseAPIController exists
+const USE_MOCK = true; // TODO: set to false when the /api/courses endpoints exist in the API
 
-export const courseService = {
-  // GET /api/courses: all courses (mock data until the API endpoint exists)
-  getAll: (): Promise<CourseDto[]> =>
-    USE_MOCK ? Promise.resolve(mockCourses) : api.get<CourseDto[]>('/courses'),
+// GET /api/courses → all courses
+export async function fetchCourses(): Promise<CourseDto[]> {
+  if (USE_MOCK) return mockDelay([...mockCourses]); // a copy, so the page can't change the "database"
 
-  getById: (id: number) => api.get<CourseDto>(`/courses/${id}`),
+  const response = await fetch(`${API_URL}/api/courses`, { headers: getAuthHeaders() });
+  return handleResponse<CourseDto[]>(response);
+}
 
-  create: (course: CreateCourseDto) => api.post<CourseDto>('/courses', course),
+// DELETE /api/courses/{id} → 204 No Content
+export async function deleteCourse(courseId: number): Promise<void> {
+  if (USE_MOCK) {
+    const index = mockCourses.findIndex((c) => c.id === courseId);
+    if (index === -1) throw new ApiError(404, 'Course not found.');
+    mockCourses.splice(index, 1); // remove it from the mock "database"
+    return mockDelay(undefined);
+  }
 
-  update: (id: number, course: CreateCourseDto) => api.put<void>(`/courses/${id}`, course),
-
-  remove: (id: number) => api.delete(`/courses/${id}`),
-};
+  const response = await fetch(`${API_URL}/api/courses/${courseId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  return handleResponse<void>(response);
+}

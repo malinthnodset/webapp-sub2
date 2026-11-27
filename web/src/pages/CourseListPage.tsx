@@ -1,65 +1,75 @@
-// CourseListPage — example page showing the pattern every page can follow:
-// 1) state for data, loading and error
-// 2) load data from a service in useEffect
-// 3) show loading / error / empty / list with conditional rendering
+// CourseListPage — the teacher's list of all courses: Read + Delete (Demo 7 and 8: ItemListPage.tsx).
+// Create (step 8) and Update (step 9) get their own pages; this page will link to them.
 
-import { useEffect, useState } from 'react';
-import { courseService } from '../services/courseService';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button, Form, Alert, Spinner } from 'react-bootstrap';
+import CourseTable from '../components/CourseTable';
 import type { CourseDto } from '../types/course';
-import './CourseListPage.css';
+import * as courseService from '../services/courseService';
 
-function CourseListPage() {
-  const [courses, setCourses] = useState<CourseDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function CourseListPage() {
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const queryClient = useQueryClient();
 
-  // Runs once when the page opens ([] = no dependencies)
-  useEffect(() => {
-    courseService
-      .getAll()
-      .then((data) => setCourses(data))
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
+  // Read: TanStack Query fetches the courses and caches them under ['courses']
+  const { data: courses = [], isLoading, error, refetch } = useQuery<CourseDto[], Error>({
+    queryKey: ['courses'],
+    queryFn: courseService.fetchCourses,
+  });
 
-  async function handleDelete(id: number) {
-    if (!confirm('Delete this course?')) return;
-    try {
-      await courseService.remove(id);
-      // Remove it from the list without reloading everything
-      setCourses(courses.filter((c) => c.id !== id));
-    } catch (err) {
-      setError((err as Error).message);
+  // Delete: a mutation, because it changes data on the server
+  const deleteMutation = useMutation({
+    mutationFn: courseService.deleteCourse,
+    onSuccess: () => {
+      // These cached lists are now out of date → TanStack Query fetches them again
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  const handleCourseDeleted = (courseId: number) => {
+    const course = courses.find((c) => c.id === courseId);
+    const confirmDelete = window.confirm(`Are you sure you want to delete the course ${course?.code}?`);
+    if (confirmDelete) {
+      deleteMutation.mutate(courseId);
     }
-  }
+  };
 
-  if (loading) return <p>Loading courses...</p>;
+  const filteredCourses = courses.filter((course) =>
+    course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   return (
     <div>
-      <h1>Courses</h1>
+      <h1>Manage courses</h1>
 
-      {/* && = only show the alert if there is an error */}
-      {error && <div className="alert alert-danger">{error}</div>}
+      <div className="d-flex gap-2 mb-3">
+        <Button onClick={() => refetch()} variant="secondary" disabled={isLoading}>
+          {isLoading ? 'Loading...' : 'Refresh courses'}
+        </Button>
+      </div>
 
-      {courses.length === 0 && !error ? (
-        <p>No courses yet.</p>
+      <Form.Group className="mb-3" controlId="courseSearch">
+        <Form.Control
+          type="search"
+          placeholder="Search by code or name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </Form.Group>
+
+      {error && <Alert variant="danger">Could not load the courses: {error.message}</Alert>}
+      {deleteMutation.error && <Alert variant="danger">Could not delete: {deleteMutation.error.message}</Alert>}
+
+      {isLoading ? (
+        <Spinner animation="border" role="status" className="d-block mx-auto" />
+      ) : filteredCourses.length === 0 ? (
+        <p className="text-muted">{searchQuery ? 'No courses match your search.' : 'There are no courses yet.'}</p>
       ) : (
-        <ul className="course-list">
-          {courses.map((course) => (
-            <li key={course.id} className="course-list__item">
-              <span>
-                <strong>{course.code}</strong> {course.name}
-              </span>
-              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(course.id)}>
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
+        <CourseTable courses={filteredCourses} onCourseDeleted={handleCourseDeleted} />
       )}
     </div>
   );
 }
-
-export default CourseListPage;
