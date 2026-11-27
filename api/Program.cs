@@ -3,6 +3,7 @@ using api.DAL;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
+using api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,9 @@ builder.Services.AddCors(options => // CORS Policy for React Frontend Integratio
 });
 
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IQuizService, QuizService>();
+builder.Services.AddScoped<IFurnitureService, FurnitureService>();
 
 var loggerConfiguration = new LoggerConfiguration()
     .MinimumLevel.Warning()
