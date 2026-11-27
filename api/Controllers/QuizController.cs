@@ -19,18 +19,20 @@ namespace api.Controllers;
 public class QuizAPIController : ControllerBase
 {
     private readonly IQuizRepository _quizRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly ILogger<QuizAPIController> _logger;
 
-    public QuizAPIController(IQuizRepository quizRepository, ILogger<QuizAPIController> logger)
+    public QuizAPIController(IQuizRepository quizRepository, ICourseRepository courseRepository, ILogger<QuizAPIController> logger)
     {
         _quizRepository = quizRepository;
+        _courseRepository = courseRepository;
         _logger = logger;
     }
 
-   // Get ALL quizzes method
+   // GET: all quizzes (list)
    [HttpGet]
    public async Task<IActionResult> QuizList()
-
+    //TODO tidy these comments:
     // 1. ask the repo for all quizzes
     // 2. optional error handling 404
     // 3. turn each quiz into a quizDto
@@ -45,9 +47,9 @@ public class QuizAPIController : ControllerBase
     
         var quizDtos = quizzes.Select(quiz => new QuizDto
         {
-            QuizId = quiz.Id,
+            Id = quiz.Id,
             Title = quiz.Title,
-            Description = quiz.Description ?? string.Empty,
+            Description = quiz.Description,
             CourseId = quiz.CourseId,
             //TODO Coursename and questioncount below cannot included yet bc include() not in repository
             //CourseName = quiz.Course.Name,
@@ -55,7 +57,108 @@ public class QuizAPIController : ControllerBase
         });
         return Ok(quizDtos);
     }
+
+    // CREATE QUIZ
+    // TODO: add this authorize --> [Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
+    [HttpPost] 
+    public async Task<IActionResult> Create([FromBody] CreateQuizDto createQuizDto)
+    {
+        var course = await _courseRepository.GetCourseById(createQuizDto.CourseId);
+        if (course == null)
+        {
+            return BadRequest("Choose an existing course");
+        }
+        var newQuiz = new Quiz
+        {
+            Title = createQuizDto.Title,
+            Description = createQuizDto.Description,
+            CourseId = createQuizDto.CourseId,
+            CreatedByStudentId = 1, // // TODO: logged-in user
+
+            //Convert each Create-Quiz-Question-Dto to Quiz-Question
+            Questions = createQuizDto.Questions.Select((q, i) => new QuizQuestion
+            {
+                Prompt = q.Prompt.Trim(),
+                CorrectAnswer = q.CorrectAnswer.Trim(),
+                Points = q.Points,
+                Order = i + 1
+            }).ToList()
+        };
+
+        bool returnOk = await _quizRepository.Create(newQuiz);
+        if (!returnOk)
+        {
+            _logger.LogWarning("[QuizAPIController] Quiz creation failed {@quiz}", newQuiz);
+            return StatusCode(500, "Internal server error");
+        }
+
+        var quizDto = new QuizDto
+        {
+            Id = newQuiz.Id,
+            Title = newQuiz.Title,
+            Description = newQuiz.Description,
+            CourseId = newQuiz.CourseId,
+            CourseName = course.Name,
+            QuestionCount = newQuiz.Questions.Count
+        };
+        return Created($"/api/quizzes/{newQuiz.Id}", quizDto);
+    }
+
+        // DELETE: /api/quizzes/{id}
+    [HttpDelete("{id}")]
+    //TODO bring back ---> [Authorize(Roles = "TEACHER")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        bool returnOk = await _quizRepository.Delete(id);
+        if (returnOk)
+        {
+            _logger.LogInformation("[QuizAPIController] Quiz {Id} was deleted", id);
+            return NoContent();   // 204: deleted, nothing to send back
+        }
+
+        _logger.LogWarning("[QuizAPIController] Quiz deletion failed, quiz {Id} not found", id);
+        return NotFound("Quiz not found");
+    }
+
+        // UPDATE - Put: /api/quizzes/{id}
+    [HttpPut("{id}")]
+    //TODO bring back--->[Authorize(Roles = "TEACHER")]
+    public async Task<IActionResult> Update(int id, [FromBody] CreateQuizDto quizDto)
+    {
+        var quiz = await _quizRepository.GetQuizById(id);
+        if (quiz == null)
+        {
+            _logger.LogWarning("[QuizAPIController] Update failed, quiz {id} not found", id);
+            return NotFound("Quiz not found");
+        }
+
+        var course = await _courseRepository.GetCourseById(createQuizDto.CourseId);
+        if (course == null)
+        {
+            return BadRequest("Choose an existing course");
+        }
+        quiz.Title = quizDto.Title;
+        quiz.Description = quizDto.Description;
+        quiz.CourseId = quizDto.CourseId;
+
+        bool returnOk = await _quizRepository.Update(quiz);
+        if (returnOk)
+        {
+            _logger.LogInformation("[QuizAPIController] Quiz {@quiz} was updated", quiz);
+            return NoContent(); //204: success, nothing to send back
+        }
+
+        _logger.LogWarning("[QuizAPIController] Quiz update failed for quiz {Id}", id);
+        return StatusCode(500, "Internal server error");
+
+    }
+
 }
+
+
+
+
+/// Old controller ------------------------------
 
 //TODO bring back authorize (following demo 9 does this) 
 // [Authorize]//If the user tries to access the quiz page without being logged in, they get redirected to the Login-path; fail-safe default and complete mediation
