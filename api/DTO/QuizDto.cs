@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using api.Models; //TODO remove because it is temporary, uncrashes dotnet build
 
-namespace api.DTOs
+namespace api.DTO
 {
 
  public class QuizDto
