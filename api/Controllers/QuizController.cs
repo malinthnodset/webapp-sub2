@@ -45,12 +45,13 @@ public class QuizAPIController : ControllerBase
     
         var quizDtos = quizzes.Select(quiz => new QuizDto
         {
-            quizId = quiz.Id,
+            QuizId = quiz.Id,
             Title = quiz.Title,
-            Description = quiz.Description,
-            Course = quiz.Course.Id,
-            CourseName = quiz.Course.Name,
-            QuestionCount = quiz.Questions.Count
+            Description = quiz.Description ?? string.Empty,
+            CourseId = quiz.CourseId,
+            //TODO Coursename and questioncount below cannot included yet bc include() not in repository
+            //CourseName = quiz.Course.Name,
+            //QuestionCount = quiz.Questions.Count
         });
         return Ok(quizDtos);
     }
