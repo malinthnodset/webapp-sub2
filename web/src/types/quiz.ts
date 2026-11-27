@@ -16,3 +16,27 @@ export interface QuizQuestionDto {
   points: number;
   order: number;
 }
+
+// A quiz with its questions, for the "take-quiz" page
+export interface QuizForTakingDto {
+  id: number;
+  title: string;
+  description: string | null;   //null when the quiz has no description
+  courseName: string;
+  questions: QuizQuestionDto[];   //list of questions, each one a QuizQuestionDto, excludes the correct answer
+}
+
+// Send when a teacher creates or edits a question
+export interface CreateQuestionDto {    //has no ID because the database creates it
+  prompt: string;
+  correctAnswer: string;    //included here so the teacher can input the correct answer, students does not have access
+  points: number;
+}
+
+// One question inside CreateQuizDto, sent when a teacher creates or edits a quiz
+export interface CreateQuizDto {
+  title: string;
+  description: string | null;  //null when the quiz has no description
+  courseId: number;
+  questions: CreateQuestionDto[];   //list of questions, each one a CreateQuestionDto
+}
