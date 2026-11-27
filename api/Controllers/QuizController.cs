@@ -47,9 +47,9 @@ public class QuizAPIController : ControllerBase
     
         var quizDtos = quizzes.Select(quiz => new QuizDto
         {
-            QuizId = quiz.Id,
+            Id = quiz.Id,
             Title = quiz.Title,
-            Description = quiz.Description ?? string.Empty,
+            Description = quiz.Description,
             CourseId = quiz.CourseId,
             //TODO Coursename and questioncount below cannot included yet bc include() not in repository
             //CourseName = quiz.Course.Name,
@@ -59,12 +59,12 @@ public class QuizAPIController : ControllerBase
     }
 
     // CREATE QUIZ
-    [Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
+    // TODO: add this authorize --> [Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
     [HttpPost] 
     public async Task<IActionResult> Create([FromBody] CreateQuizDto createQuizDto)
     {
         var course = await _courseRepository.GetCourseById(createQuizDto.CourseId);
-        if (createQuizDto == null)
+        if (course == null)
         {
             return BadRequest("Choose an existing course");
         }
@@ -73,7 +73,7 @@ public class QuizAPIController : ControllerBase
             Title = createQuizDto.Title,
             Description = createQuizDto.Description,
             CourseId = createQuizDto.CourseId,
-            //CreatedByUser = 1, // TODO can be added if wanted (nice2do)
+            CreatedByStudentId = 1, // // TODO: logged-in user
 
             //Convert each Create-Quiz-Question-Dto to Quiz-Question
             Questions = createQuizDto.Questions.Select((q, i) => new QuizQuestion
@@ -88,20 +88,36 @@ public class QuizAPIController : ControllerBase
         bool returnOk = await _quizRepository.Create(newQuiz);
         if (!returnOk)
         {
-            _logger.LogWarning("QuizAPIController] Quiz creation failed {@quiz}", newQuiz);
+            _logger.LogWarning("[QuizAPIController] Quiz creation failed {@quiz}", newQuiz);
             return StatusCode(500, "Internal server error");
         }
 
         var quizDto = new QuizDto
         {
-            QuizId = newQuiz.Id,
+            Id = newQuiz.Id,
             Title = newQuiz.Title,
             Description = newQuiz.Description,
             CourseId = newQuiz.CourseId,
             CourseName = course.Name,
             QuestionCount = newQuiz.Questions.Count
         };
-        return Created($"/api/quizzes{newQuiz.Id}", quizDto);
+        return Created($"/api/quizzes/{newQuiz.Id}", quizDto);
+    }
+
+        // DELETE: /api/quizzes/{id}
+    [HttpDelete("{id}")]
+    //TODO bring back ---> [Authorize(Roles = "TEACHER")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        bool returnOk = await _quizRepository.Delete(id);
+        if (returnOk)
+        {
+            _logger.LogInformation("[QuizAPIController] Quiz {Id} was deleted", id);
+            return NoContent();   // 204: deleted, nothing to send back
+        }
+
+        _logger.LogWarning("[QuizAPIController] Quiz deletion failed, quiz {Id} not found", id);
+        return NotFound("Quiz not found");
     }
 
 }
