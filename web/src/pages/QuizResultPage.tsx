@@ -1,40 +1,36 @@
 //Shows the score, per-question feedback and gamification rewards after a quiz.
 
-import { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router";
-import { quizService } from "../services/quizService";
-import type { QuizResultDto } from "../types/attempt";
+import { Link, useLocation, useParams } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import { quizService } from '../services/quizService';
+import type { QuizResultDto } from '../types/attempt';
 
 function QuizResultPage() {
-  //1. Read the quizId from the URL and the result passed from TakeQuizPage
+  //1. Read the quiz id from the URL and the result passed from TakeQuizPage
   const { id } = useParams();
   const quizId = Number(id);
   const location = useLocation();
-  const passedResult = location.state as QuizResultDto | null; //null if the page is opened directly or reloaded
+  // location.state has no type, so we tell TypeScript what TakeQuizPage sent (null if the page was opened directly)
+  const passedResult = location.state as QuizResultDto | null;
 
-  //2. State: start with the passed result of we have one
-  const [result, setResult] = useState<QuizResultDto | null>(passedResult);
-  const [loading, setLoading] = useState(!passedResult);  //only load if nothing was passed
-  const [error, setError] = useState<string | null>(null);
+  //2. Fetch the latest result, but only if nothing was passed along
+  const { data, isLoading, error } = useQuery<QuizResultDto, Error>({
+    queryKey: ['result', quizId],
+    queryFn: () => quizService.getLatestResult(quizId),
+    enabled: !passedResult, // false = don't fetch, we already have the result
+    retry: false,           // a 404 ("not taken yet") won't fix itself, so don't try again
+  });
 
-  //3. Fetch the last result only if it wasnt't passed along
-  useEffect(() => {
-    if (result) return; //if the result is there, then no request needed
+  // Use the passed result if we have one, otherwise the fetched one
+  const result = passedResult ?? data;
 
-    quizService
-      .getLatestResult(quizId)
-      .then(setResult)
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [quizId, result]);
-
-  //4. What to show
-  if (loading) return <p>Loading result...</p>   //Loading message
+  //3. What to show
+  if (isLoading) return <p>Loading result...</p>;
   if (!result) {
     return (
       <div>
-        <div className="alert alert-danger">{error ?? 'No result found.'}</div>
-        <Link to={`/quizzes/${quizId}/take`} className="btn btn-dark">Take the quiz</Link>   {/*Button to redirect to the quiz*/}
+        <div className="alert alert-danger">{error?.message ?? 'No result found.'}</div>
+        <Link to={`/quizzes/${quizId}/take`} className="btn btn-dark">Take the quiz</Link>
       </div>
     );
   }
