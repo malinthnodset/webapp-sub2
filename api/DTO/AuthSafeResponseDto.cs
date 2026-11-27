@@ -8,17 +8,9 @@ namespace api.DTO
     public class AuthSafeResponseDto
     {
         // Fields based on whats already used in frontend
-
-        [Required]
-        public string token { get; set; }
-
-        [Required]
-        public string name { get; set; }
-        
-        [Required]
-        public string email { get; set; }
-
-        [Required]
-        public Role Role { get; set; } = Role.STUDENT;
+        public required string token { get; set; } // init instead of set?
+        public required string name { get; set; }
+        public required string email { get; set; }
+        public required Role Role { get; set; } = Role.STUDENT;
     }
 }
