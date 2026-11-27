@@ -7,7 +7,7 @@ export const mockQuiz: QuizForTakingDto = {
   id: 1,
   title: 'MVC basics',
   description: 'A short warm-up quiz about ASP.NET MVC',
-  courseName: 'Web applications',
+  courseCode: 'ITPE3200',
   questions: [
     { id: 1, prompt: 'What does the C in MVC stand for?', points: 1, order: 1 },
     { id: 2, prompt: 'Which keyword waits for a Task to finish?', points: 1, order: 2 },
@@ -24,3 +24,6 @@ export const mockCorrectAnswers: Record<number, string> = {
   3: 'delete',
   4: 'data transfer object',
 };
+
+//Course title for the mock result page (the real API gets it from the Course table)
+export const mockCourseTitle = 'Web applications';
