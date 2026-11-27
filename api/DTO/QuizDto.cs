@@ -4,9 +4,9 @@ namespace api.DTO
 {
     public class QuizDto
     {
-        public int QuizId { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
-        public string? Description { get; set; } = string.Empty;
+        public string? Description { get; set; } 
         public int CourseId { get; set; }
         public string CourseName { get; set; } = string.Empty;
         public int QuestionCount { get; set; }

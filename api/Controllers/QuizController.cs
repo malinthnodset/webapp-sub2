@@ -120,6 +120,39 @@ public class QuizAPIController : ControllerBase
         return NotFound("Quiz not found");
     }
 
+        // UPDATE - Put: /api/quizzes/{id}
+    [HttpPut("{id}")]
+    //TODO bring back--->[Authorize(Roles = "TEACHER")]
+    public async Task<IActionResult> Update(int id, [FromBody] CreateQuizDto quizDto)
+    {
+        var quiz = await _quizRepository.GetQuizById(id);
+        if (quiz == null)
+        {
+            _logger.LogWarning("[QuizAPIController] Update failed, quiz {id} not found", id);
+            return NotFound("Quiz not found");
+        }
+
+        var course = await _courseRepository.GetCourseById(createQuizDto.CourseId);
+        if (course == null)
+        {
+            return BadRequest("Choose an existing course");
+        }
+        quiz.Title = quizDto.Title;
+        quiz.Description = quizDto.Description;
+        quiz.CourseId = quizDto.CourseId;
+
+        bool returnOk = await _quizRepository.Update(quiz);
+        if (returnOk)
+        {
+            _logger.LogInformation("[QuizAPIController] Quiz {@quiz} was updated", quiz);
+            return NoContent(); //204: success, nothing to send back
+        }
+
+        _logger.LogWarning("[QuizAPIController] Quiz update failed for quiz {Id}", id);
+        return StatusCode(500, "Internal server error");
+
+    }
+
 }
 
 
