@@ -42,10 +42,17 @@ function QuizResultPage() {
       result.percentage >= 50 ? 'Good job!' :
         'Keep practising!';
 
+  //Best score across all attempts, used in the attempt history
+  const bestPercentage = result.attemptHistory.length > 0
+    ? Math.max(...result.attemptHistory.map((a) => a.percentage))
+    : result.percentage;
+
   return (
     <div>
-      <p className="text-muted mb-1">Result</p>
-      <h1>{result.quizTitle}</h1>
+      <p className="text-muted mb-1">
+        {result.courseCode} · {result.courseTitle} · Attempt #{result.attemptNumber}
+      </p>
+      <h1>{result.title}</h1>
 
       {/*Score summary*/}
       <div className="mb-4">
@@ -70,21 +77,54 @@ function QuizResultPage() {
       {/* Feedback per question */}
       <h2 className="h4">Your answers</h2>
       <ul className="list-unstyled">
-        {result.feedback.map((f, i) => (
-          <li key={f.quizQuestionId} className={`p-3 mb-2 border rounded ${f.isCorrect ? 'border-success' : 'border-danger'}`}>  {/*Gives a green or red border around the answer based on whether it is correct or not*/}
+        {result.answers.map((a, i) => (
+          <li key={a.questionId} className={`p-3 mb-2 border rounded ${a.isCorrect ? 'border-success' : 'border-danger'}`}>  {/*Gives a green or red border around the answer based on whether it is correct or not*/}
             <p className="mb-1">
-              <span aria-hidden="true">{f.isCorrect ? '✓' : '✗'}</span> {i + 1}. {f.prompt} {/*If answer is correct: checkmark. If not: X*/}
+              <span aria-hidden="true">{a.isCorrect ? '✓' : '✗'}</span> {i + 1}. {a.prompt} {/*If answer is correct: checkmark. If not: X*/}
             </p>
             <p className="mb-0">
-              Your answer: <strong>{f.submittedAnswer || '(no answer)'}</strong> · {f.pointsAwarded} p
+              Your answer: <strong>{a.submittedAnswer || '(no answer)'}</strong> · {a.pointsAwarded} p
             </p>
             {/*Only show the correct answer when the student got it wrong*/}
-            {!f.isCorrect && (
-              <p className="mb-0 text-success">Correct answer: <strong>{f.correctAnswer}</strong></p>
+            {!a.isCorrect && (
+              <p className="mb-0 text-success">Correct answer: <strong>{a.correctAnswer}</strong></p>
             )}
           </li>
         ))}
       </ul>
+
+      {/* Attempt history: all the student's attempts at this quiz, newest first */}
+      <h2 className="h4 mt-4">Attempt history</h2>
+      {result.attemptHistory.length <= 1 ? (
+        <p className="text-muted">This was your first attempt. Try again to beat your score!</p>
+      ) : (
+        <>
+          <p>Best score: <strong>{bestPercentage}%</strong></p>
+          <table className="table table-sm">
+            <thead>
+              <tr>
+                <th>Attempt</th>
+                <th>Completed</th>
+                <th>Points</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.attemptHistory.map((attempt) => {
+                const isCurrent = attempt.attemptNumber === result.attemptNumber;
+                return (
+                  <tr key={attempt.attemptNumber} className={isCurrent ? 'table-active fw-bold' : ''}>
+                    <td>#{attempt.attemptNumber}{isCurrent && ' (this one)'}</td>
+                    <td>{new Date(attempt.completedAt).toLocaleString('nb-NO')}</td>
+                    <td>{attempt.pointsEarned} / {attempt.maximumPoints}</td>
+                    <td>{attempt.percentage}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </>
+      )}
 
       {/* Navigation */}
       <div className="d-flex gap-2">
@@ -96,5 +136,3 @@ function QuizResultPage() {
 }
 
 export default QuizResultPage;
-
-

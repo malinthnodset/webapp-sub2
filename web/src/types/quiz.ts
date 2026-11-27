@@ -22,7 +22,7 @@ export interface QuizForTakingDto {
   id: number;
   title: string;
   description: string | null;   //null when the quiz has no description
-  courseName: string;
+  courseCode: string;   //e.g. "ITPE3200"
   questions: QuizQuestionDto[];   //list of questions, each one a QuizQuestionDto, excludes the correct answer
 }
 
