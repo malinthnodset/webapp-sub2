@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import CourseListPage from './pages/CourseListPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
+import TakeQuizPage from './pages/TakeQuizPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/courses" element={<CourseListPage />} />
         <Route path="/login" element={<LoginPage />} />
         {/* "*" = any URL that didn't match above */}
+        <Route path="/quizzes/:id/take" element={<TakeQuizPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
