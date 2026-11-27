@@ -1,3 +1,5 @@
+//TODO rename to CourseAPIController
+
 using api.DAL;
 using Microsoft.AspNetCore.Mvc;
 using api.Models;
@@ -6,7 +8,50 @@ using api.ViewModels;
 
 namespace api.Controllers;
 
-[Authorize]     //If the user tries to access the course page without being logged in, they get redirected to the Login-path; fail-safe default and complete mediation
+//TODO bring back after autorization is done (demo 9) --> [Authorize]     //If the user tries to access the course page without being logged in, they get redirected to the Login-path; fail-safe default and complete mediation
+
+[ApiController]
+[Route("api/courses")]
+
+public class CourseAPIController : ControllerBase
+{
+        // dependency injection - controller looks to interface repository files
+    private readonly ICourseRepository _courseRepository; // create in DAL
+    private readonly ILogger<QuizAPIController> _logger;
+
+        public CourseAPIController(ILogger<QuizAPIController> logger, ICourseRepository courseRepository)
+    {
+        _logger = logger;
+        _courseRepository = courseRepository;
+    }
+
+    [HttpGet]
+   public async Task<IActionResult> QuizList()
+
+    {
+        var courses = await _courseRepository.GetAllCourses();
+        if (courses == null)
+        {
+            _logger.LogError("[QuizAPIController] Quiz list not found while executing _quizRepository.GetAllQuizzes()");
+            return NotFound("Quiz list not found");
+        }
+    
+        var quizDtos = courses.Select(course => new CourseDto
+        {
+            QuizId = quiz.Id,
+            Title = quiz.Title,
+            Description = quiz.Description ?? string.Empty,
+            CourseId = quiz.CourseId,
+            //TODO Coursename and questioncount below cannot included yet bc include() not in repository
+            //CourseName = quiz.Course.Name,
+            //QuestionCount = quiz.Questions.Count
+        });
+        return Ok(quizDtos);
+    }
+}
+
+
+
 public class CourseController : Controller
 {
     // dependency injection - controller looks to interface repository files

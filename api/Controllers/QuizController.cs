@@ -30,7 +30,7 @@ public class QuizAPIController : ControllerBase
    // Get ALL quizzes method
    [HttpGet]
    public async Task<IActionResult> QuizList()
-
+    //TODO tidy comments
     // 1. ask the repo for all quizzes
     // 2. optional error handling 404
     // 3. turn each quiz into a quizDto
