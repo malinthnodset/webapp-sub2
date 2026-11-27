@@ -8,8 +8,6 @@ using api.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.VisualBasic;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace api.Controllers;
 
@@ -132,7 +130,7 @@ public class QuizAPIController : ControllerBase
             return NotFound("Quiz not found");
         }
 
-        var course = await _courseRepository.GetCourseById(createQuizDto.CourseId);
+        var course = await _courseRepository.GetCourseById(quizDto.CourseId);
         if (course == null)
         {
             return BadRequest("Choose an existing course");
