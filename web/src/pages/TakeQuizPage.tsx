@@ -3,7 +3,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { quizService } from '../services/quizService';
 import type { QuizForTakingDto } from '../types/quiz';
 import type { QuizResultDto, SubmitQuizDto } from '../types/attempt';
@@ -13,6 +13,7 @@ function TakeQuizPage() {
   const { id } = useParams();
   const quizId = Number(id);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   //2. Fetch the quiz: TanStack Query gives us data, isLoading and error
   const { data: quiz, isLoading, error } = useQuery<QuizForTakingDto, Error>({
@@ -24,7 +25,11 @@ function TakeQuizPage() {
   const submitMutation = useMutation<QuizResultDto, Error, SubmitQuizDto>({
     mutationFn: quizService.submit,
     // Runs when the server has answered: go to the result page and bring the result along
-    onSuccess: (result) => navigate(`/quizzes/${quizId}/result`, { state: result }),
+    onSuccess: (result) => {
+      // The old cached result is now outdated, so mark it as stale
+      queryClient.invalidateQueries({ queryKey: ['result', quizId] });
+      navigate(`/quizzes/${quizId}/result`, { state: result });
+    },
   });
 
   //4. Local form state: what the student types, and which questions are unanswered
