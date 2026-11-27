@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using api.DAL;
-using api.ViewModels;
+using api.DTO;
 
 //Reads courses, quizzes, questions and the users attempts from the database through QuizDbContext,
 //and builds a DashboardViewModel for the DashboardController.
@@ -10,11 +10,10 @@ namespace api.Services;
 public class DashboardService
 {
     private readonly QuizDbContext _db;
-    //(constructor) stores the database context that the service uses to query data.
     public DashboardService(QuizDbContext db) => _db = db;
 
     //Loads all courses with their quizzes and questions, finds the users best percentage per quiz from their attempts, and maps everything into DashboardViewModel.
-    public async Task<DashboardViewModel> GetDashboardAsync(string? userId)
+    public async Task<DashboardDto> GetDashboardAsync(string? userId)
     {
         var courses = await _db.Courses
             .AsNoTracking()
@@ -43,13 +42,13 @@ public class DashboardService
                 .ToDictionary(g => g.Key, g => g.Count());
         }
 
-        return new DashboardViewModel
+        return new DashboardDto
         {
-            Courses = courses.Select(c => new CourseSummaryViewModel
+            Courses = courses.Select(c => new CourseSummaryDto
             {
                 Id = c.Id,
                 Title = c.Name,
-                Quizzes = c.Quizzes.Select(q => new QuizSummaryViewModel
+                Quizzes = c.Quizzes.Select(q => new QuizSummaryDto
                 {
                     Id = q.Id,
                     Title = q.Title,

@@ -31,6 +31,7 @@ builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IFurnitureService, FurnitureService>();
+builder.Services.AddScoped<DashboardService>();
 
 var loggerConfiguration = new LoggerConfiguration()
     .MinimumLevel.Warning()
