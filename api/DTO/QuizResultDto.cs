@@ -9,6 +9,7 @@ namespace api.DTO
         public string Title { get; set; } = string.Empty; // quiz title
         public string CourseCode { get; set; } = string.Empty;
         public string CourseTitle { get; set; } = string.Empty;
+       
         //public int AttemptId { get; set; } // for db - unecessary?
         public int AttemptNumber { get; set; } // for display
         public DateTimeOffset CompletedAt { get; set; }
