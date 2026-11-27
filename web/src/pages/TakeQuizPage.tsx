@@ -49,7 +49,7 @@ function TakeQuizPage() {
     submitMutation.mutate({
       quizId,
       answers: quiz.questions.map((q) => ({
-        quizQuestionId: q.id,
+        questionId: q.id,
         submittedAnswer: answers[q.id].trim(),
       })),
     });
@@ -63,7 +63,7 @@ function TakeQuizPage() {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <p className="text-muted mb-1">{quiz.courseName}</p>
+      <p className="text-muted mb-1">{quiz.courseCode}</p>
       <h1>{quiz.title}</h1>
       {quiz.description && <p>{quiz.description}</p>}
 

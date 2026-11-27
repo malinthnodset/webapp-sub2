@@ -1,30 +1,41 @@
 //All the HTTP calls for quizzes and quiz attempts
+//All the HTTP calls for quizzes and quiz attempts
 
 import { api, ApiError } from './api';
 import type { QuizDto, QuizForTakingDto, CreateQuizDto } from '../types/quiz';
-import type { SubmitQuizDto, QuizResultDto, AnswerFeedbackDto } from '../types/attempt';
-import { mockQuiz, mockCorrectAnswers } from '../mocks/quizMocks';
+import type { SubmitQuizDto, QuizResultDto, QuizAnswerResultDto, QuizAttemptHistoryDto } from '../types/attempt';
+import { mockQuiz, mockCorrectAnswers, mockCourseTitle } from '../mocks/quizMocks';
 
-const USE_MOCK = true; //TODO: set to false whenthe quiz endpoints exist in the API!!
-let lastMockResult: QuizResultDto | null = null;  // Remembers the last mock result, so the result page can be reloaded in mock mode
+const USE_MOCK = true; //TODO: set to false when the quiz endpoints exist in the API!!
+
+//Remembers the last mock result, so the result page can be reloaded in mock mode
 //Since it is outside quizService, the last result is saved as long as the app is alive
+let lastMockResult: QuizResultDto | null = null;
 
+//Every mock attempt, so the result page can show an attempt history
+//(the real API stores attempts in the QuizAttempts table)
+const mockAttempts: QuizAttemptHistoryDto[] = [];
 
 //Simulating an API call -> returns value after 300ms wrapped in a Promise
-//Let's us see and test loading state on pages
+//Lets us see and test loading state on pages
 function delay<T>(value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), 300));
 }
 
-//Fake grading, trim+ignore case, full point is correct, 0 if wrong
+//Same rounding as the backend: percentage with 2 decimals, 0 if the quiz has no points
+function toPercentage(earned: number, max: number): number {
+  return max === 0 ? 0 : Math.round((earned / max) * 10000) / 100;
+}
+
+//Fake grading, trim + ignore case, full points if correct, 0 if wrong
 function mockGrade(data: SubmitQuizDto): QuizResultDto {
-  const feedback: AnswerFeedbackDto[] = mockQuiz.questions.map((question) => {
-    const submitted = data.answers.find((a) => a.quizQuestionId === question.id)?.submittedAnswer ?? null;
+  const answers: QuizAnswerResultDto[] = mockQuiz.questions.map((question) => {
+    const submitted = data.answers.find((a) => a.questionId === question.id)?.submittedAnswer ?? null;
     const correctAnswer = mockCorrectAnswers[question.id];
     const isCorrect = submitted?.trim().toLowerCase() === correctAnswer.toLowerCase();
 
     return {
-      quizQuestionId: question.id,
+      questionId: question.id,
       prompt: question.prompt,
       submittedAnswer: submitted,
       correctAnswer,
@@ -32,23 +43,38 @@ function mockGrade(data: SubmitQuizDto): QuizResultDto {
       pointsAwarded: isCorrect ? question.points : 0,
     };
   });
-  const pointsEarned = feedback.reduce((sum, f) => sum + f.pointsAwarded, 0);
-  const maximumPoints = mockQuiz.questions.reduce((sum, q) => sum + q.points, 0);
 
-  return {
-    attemptId: 1,
-    quizId: data.quizId,
-    quizTitle: mockQuiz.title,
-    completedAt: new Date().toISOString(),
+  const pointsEarned = answers.reduce((sum, a) => sum + a.pointsAwarded, 0);
+  const maximumPoints = mockQuiz.questions.reduce((sum, q) => sum + q.points, 0);
+  const percentage = toPercentage(pointsEarned, maximumPoints);
+  const completedAt = new Date().toISOString();
+
+  //Save this attempt in the mock history
+  mockAttempts.push({
+    attemptNumber: mockAttempts.length + 1,
+    completedAt,
     pointsEarned,
     maximumPoints,
-    correctAnswers: feedback.filter((f) => f.isCorrect).length,
-    totalQuestions: feedback.length,
-    percentage: Math.round((pointsEarned / maximumPoints) * 100),
-    feedback,
-    catJustFreed: true,         // pretend this was the student's first quiz
+    percentage,
+  });
+
+  return {
+    quizId: data.quizId,
+    title: mockQuiz.title,
+    courseCode: mockQuiz.courseCode,
+    courseTitle: mockCourseTitle,
+    attemptNumber: mockAttempts.length,
+    completedAt,
+    attemptHistory: [...mockAttempts].reverse(), // newest first, like the backend
+    pointsEarned,
+    maximumPoints,
+    correctAnswers: answers.filter((a) => a.isCorrect).length,
+    totalQuestions: answers.length,
+    percentage,
+    catJustFreed: mockAttempts.length === 1, // the cat only escapes on the very first attempt
     newFurnitureName: null,
     newFurnitureSlug: null,
+    answers,
   };
 }
 

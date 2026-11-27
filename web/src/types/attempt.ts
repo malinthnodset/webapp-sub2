@@ -3,7 +3,7 @@
 
 // What the student sends when submitting a quiz
 export interface SubmitAnswerDto {
-  quizQuestionId: number;
+  questionId: number;
   submittedAnswer: string;
 }
 
@@ -13,8 +13,8 @@ export interface SubmitQuizDto {
 }
 
 // Immediate feedback per question (CorrectAnswer is only sent AFTER submitting)
-export interface AnswerFeedbackDto {
-  quizQuestionId: number;
+export interface QuizAnswerResultDto {
+  questionId: number;
   prompt: string;
   submittedAnswer: string | null;
   correctAnswer: string;
@@ -22,23 +22,37 @@ export interface AnswerFeedbackDto {
   pointsAwarded: number;
 }
 
+// One earlier attempt in the history list
+export interface QuizAttemptHistoryDto {
+  attemptNumber: number;
+  completedAt: string; // C# DateTimeOffset arrives as an ISO string, e.g. "2026-11-27T18:00:00+00:00"
+  pointsEarned: number;
+  maximumPoints: number;
+  percentage: number;
+}
+
 // The result page after a quiz — also used in the submission history list
 export interface QuizResultDto {
-  attemptId: number;
   quizId: number;
-  quizTitle: string;
+  title: string;  //quiz title
+  courseCode: string;
+  courseTitle: string;
+  attemptNumber: number;
   completedAt: string; // C# DateTime arrives as an ISO string, e.g. "2026-11-26T19:00:00Z"
+  attemptHistory: QuizAttemptHistoryDto[];   //All attempts at this quiz, newest first
   pointsEarned: number;
   maximumPoints: number;
   correctAnswers: number;
   totalQuestions: number;
   percentage: number;
-  feedback: AnswerFeedbackDto[];
+  
 
   // Gamification (from the furniture unlock system in Subapp 1)
   catJustFreed: boolean;           // true after the student's first completed quiz
   newFurnitureName: string | null; // e.g. "Cat tree" — null if nothing was unlocked
   newFurnitureSlug: string | null; // e.g. "cat-tree" → /images/furniture/cat-tree.png
+
+  answers: QuizAnswerResultDto[];
 }
 
 // One row in the leaderboard
