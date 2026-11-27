@@ -1,5 +1,4 @@
 // ensures a response that confirms auth, wihtout accidentally exposing sensitive data
-using api.Model;
 
 namespace api.DTO
 {
@@ -9,7 +8,7 @@ namespace api.DTO
         public string token { get; set; }
         public string name { get; set; }
         public string email { get; set; }
-       // public enum role
-
+        
+        // public enum role
     }
 }
