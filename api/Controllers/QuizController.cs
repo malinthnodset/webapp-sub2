@@ -30,11 +30,6 @@ public class QuizAPIController : ControllerBase
    // GET: all quizzes (list)
    [HttpGet]
    public async Task<IActionResult> QuizList()
-    //TODO tidy these comments:
-    // 1. ask the repo for all quizzes
-    // 2. optional error handling 404
-    // 3. turn each quiz into a quizDto
-    // 4. answer 200 OK with the list of QuizDtos
     {
         var quizzes = await _quizRepository.GetAllQuizzes();
         if (quizzes == null)
@@ -49,9 +44,8 @@ public class QuizAPIController : ControllerBase
             Title = quiz.Title,
             Description = quiz.Description,
             CourseId = quiz.CourseId,
-            //TODO Coursename and questioncount below cannot included yet bc include() not in repository
-            //CourseName = quiz.Course.Name,
-            //QuestionCount = quiz.Questions.Count
+            CourseName = quiz.Course.Name,
+            QuestionCount = quiz.Questions.Count
         });
         return Ok(quizDtos);
     }
@@ -149,6 +143,34 @@ public class QuizAPIController : ControllerBase
         _logger.LogWarning("[QuizAPIController] Quiz update failed for quiz {Id}", id);
         return StatusCode(500, "Internal server error");
 
+    }
+
+    // GET: /api/quizzes/{id}/take - quiz for a student, WITHOUT correct answers
+    [HttpGet("{id}/take")]
+    public async Task<IActionResult> Take(int id)
+    {
+        var quiz = await _quizRepository.GetQuizForTakingAsync(id);
+        if (quiz == null)
+        {
+            _logger.LogWarning("[QuizAPIController] Quiz id {id} not found", id);
+            return NotFound("Quiz not found");
+        }
+
+        var takeQuizDto = new TakeQuizDto
+        {
+            Id = quiz.Id,
+            Title = quiz.Title,
+            Description = quiz.Description,
+            CourseCode = quiz.Course.Code,
+            Questions = quiz.Questions.Select(q => new TakeQuizQuestionDto
+            {
+                Id = q.Id,
+                Prompt = q.Prompt,
+                Points = q.Points,
+                Order = q.Order
+            }).ToList()
+        };
+        return Ok(takeQuizDto);
     }
 
 }
