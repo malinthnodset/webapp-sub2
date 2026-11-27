@@ -99,18 +99,3 @@ export const api = {
 export function mockDelay<T>(value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), 300));
 }
-
-// ---------- Old token helpers ----------
-// The old authService.ts still uses these three. We delete them in step 3,
-// when the new login (AuthProvider) takes over saving and removing the token.
-export function getToken(): string | null {
-  return localStorage.getItem('token');
-}
-
-export function setToken(token: string): void {
-  localStorage.setItem('token', token);
-}
-
-export function clearToken(): void {
-  localStorage.removeItem('token');
-}

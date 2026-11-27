@@ -1,52 +1,83 @@
-// LoginPage — a controlled form: React state holds what is typed in the inputs.
+// LoginPage — the login form (Demo 10: LoginPage.tsx).
+// It calls login() from AuthContext, which calls authService and saves the token.
 
-import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
-import { authService } from '../services/authService';
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { useAuth } from '../context/useAuth';
 
-function LoginPage() {
-  const navigate = useNavigate();
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  async function handleSubmit(e: FormEvent) {
+  // Set by ProtectedRoute (step 6): the page the user wanted before they were sent here
+  const state = location.state as { from?: string } | null;
+
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault(); // stop the browser from reloading the page
-
-    // Client-side validation (the API must validate too!)
-    if (!email || !password) {
-      setError('Please fill in email and password.');
-      return;
-    }
-
+    setError(null);
+    setIsSubmitting(true);
     try {
-      await authService.login({ email, password });
-      navigate('/courses');
+      await login({ email, password });
+      // Go back to the page the user wanted, or to the dashboard
+      navigate(state?.from ?? '/dashboard', { replace: true });
     } catch (err) {
-      setError((err as Error).message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Invalid email or password.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
-    <div>
+    <div className="mx-auto" style={{ maxWidth: '500px' }}>
       <h1>Log in</h1>
-      {error && <div className="alert alert-danger">{error}</div>}
+      {error && <Alert variant="danger">{error}</Alert>}
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email</label>
-          <input id="email" type="email" className="form-control"
-            value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">Password</label>
-          <input id="password" type="password" className="form-control"
-            value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-        <button type="submit" className="btn btn-dark">Log in</button>
-      </form>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3" controlId="formLoginEmail">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isSubmitting}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3" controlId="formLoginPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isSubmitting}
+            required
+          />
+        </Form.Group>
+
+        <Button variant="primary" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Spinner animation="border" size="sm" className="me-2" />
+              Logging in...
+            </>
+          ) : (
+            'Log in'
+          )}
+        </Button>
+      </Form>
     </div>
   );
 }
-
-export default LoginPage;

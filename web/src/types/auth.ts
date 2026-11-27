@@ -1,20 +1,29 @@
-// Auth DTOs — what we send to and get back from /api/auth/...
+// Auth DTOs — what we send to and get back from /api/auth/... (Demo 10: "Adding types").
+// They match LoginRequestDto, RegisterUserRequestDto and AuthSafeResponseDto in api/DTO/.
 
+// Same values as the Role enum in api/Models/User.cs
+export type Role = 'STUDENT' | 'TEACHER';
+
+// C#: LoginRequestDto { Email, Password }
 export interface LoginDto {
   email: string;
   password: string;
 }
 
+// C#: RegisterUserRequestDto { Name, Email, Password, ConfirmPassword, Role }
 export interface RegisterDto {
   name: string;
   email: string;
   password: string;
+  confirmPassword: string;
+  role: Role;
 }
 
-// The API answers a successful login with a JWT token and some info about the user
-export interface AuthResponseDto {
+// C#: AuthSafeResponseDto — the login answer. The token is what matters;
+// everything else about the user is read FROM the token with jwtDecode (see types/user.ts).
+export interface AuthResponse {
   token: string;
   name: string;
   email: string;
-  role: 'STUDENT' | 'TEACHER'; // same values as the Role enum in Subapp 1
+  role: Role;
 }

@@ -2,14 +2,14 @@
 // <Outlet /> is where the current page is drawn, like @RenderBody() in Razor.
 
 import { NavLink, Outlet, useNavigate } from 'react-router';
-import { authService } from '../services/authService';
+import { useAuth } from '../context/useAuth';
 
 function Layout() {
   const navigate = useNavigate();
-  const loggedIn = authService.isLoggedIn();
+  const { user, logout } = useAuth(); //read the login state from AuthContext
 
   function handleLogout() {
-    authService.logout();
+    logout();
     navigate('/login');
   }
 
@@ -27,7 +27,7 @@ function Layout() {
             </NavLink>
 
             {/* Conditional rendering: show Log out OR Log in depending on state */}
-            {loggedIn ? (
+            {user ? (
               <button className="btn btn-outline-dark btn-sm" onClick={handleLogout}>
                 Log out
               </button>
