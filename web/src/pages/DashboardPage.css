@@ -1,0 +1,30 @@
+/* Styles only for DashboardPage. Class names start with "dashboard-" so they don't clash with other pages. */
+
+.dashboard-filters {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 3px solid var(--pixel-ink);
+  background: #fff;
+}
+
+.dashboard-course {
+  margin-bottom: 0.75rem;
+  border: 3px solid var(--pixel-ink);
+  background: #fff;
+  box-shadow: 4px 4px 0 var(--pixel-ink);
+}
+
+.dashboard-course__title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  list-style: none;
+  background: var(--pixel-cream);
+}
+
+/* Remove the default triangle in Safari; the whole row is clickable anyway */
+.dashboard-course__title::-webkit-details-marker {
+  display: none;
+}
