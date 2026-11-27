@@ -11,9 +11,12 @@ namespace api.DTO
         public string Email { get; set; } = string.Empty;
 
         [Required]
+        [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 
         [Required]
+        [Display(Name = "Confirm password")]
+        [DataType(DataType.Password)]
         public string ConfirmPassword { get; set; } = string.Empty;
 
         // Student is default - teachers are generated differently (?)
