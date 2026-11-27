@@ -4,7 +4,8 @@
 import { api, ApiError } from './api';
 import type { QuizDto, QuizForTakingDto, CreateQuizDto } from '../types/quiz';
 import type { SubmitQuizDto, QuizResultDto, QuizAnswerResultDto, QuizAttemptHistoryDto } from '../types/attempt';
-import { mockQuiz, mockCorrectAnswers, mockCourseTitle } from '../mocks/quizMocks';
+import { mockQuiz, mockCorrectAnswers, mockCourseTitle, mockQuizForEdit } from '../mocks/quizMocks';
+import { mockCourses } from '../mocks/courseMocks';
 
 const USE_MOCK = true; //TODO: set to false when the quiz endpoints exist in the API!!
 
@@ -15,9 +16,12 @@ let lastMockResult: QuizResultDto | null = null;
 //Every mock attempt, so the result page can show an attempt history
 //(the real API stores attempts in the QuizAttempts table)
 const mockAttempts: QuizAttemptHistoryDto[] = [];
+//Quizzes the teacher can edit in mock mode: quizId → quiz with correct answers.
+//Quiz 1 is the same quiz as mockQuiz. New quizzes get id 2, 3, 4 ...
+const mockEditableQuizzes: Record<number, CreateQuizDto> = { 1: mockQuizForEdit };
+let nextMockQuizId = 2;
 
-//Simulating an API call -> returns value after 300ms wrapped in a Promise
-//Lets us see and test loading state on pages
+//Simulating an API call, returns value after 300ms wrapped in a Promise. Lets us see and test loading state on pages
 function delay<T>(value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), 300));
 }
@@ -98,15 +102,39 @@ export const quizService = {
     return Promise.reject(new ApiError(404, 'You have not taken this quiz yet.'));
   },
 
-  // --- Managing quizzes (teacher) — used in step 6 and 7 ---
-
+  //Managing quizzes (teacher) — used in step 6 and 7 ---
   getAll: () => api.get<QuizDto[]>('/quizzes'),
 
-  getForEdit: (id: number) => api.get<CreateQuizDto>(`/quizzes/${id}/edit`),
+    // GET /api/quizzes/{id}/edit: the quiz WITH correct answers, so the teacher can edit it
+  getForEdit: (id: number): Promise<CreateQuizDto> => {
+    if (!USE_MOCK) return api.get<CreateQuizDto>(`/quizzes/${id}/edit`);
+    const quiz = mockEditableQuizzes[id];
+    return quiz ? delay(quiz) : Promise.reject(new ApiError(404, 'Quiz not found.'));
+  },
 
-  create: (quiz: CreateQuizDto) => api.post<QuizDto>('/quizzes', quiz),
+  // POST /api/quizzes: Creates a new quiz, the server answers with the saved quiz (including its new id)
+  create: (quiz: CreateQuizDto): Promise<QuizDto> => {
+    if (!USE_MOCK) return api.post<QuizDto>('/quizzes', quiz);
+    const id = nextMockQuizId++;
+    mockEditableQuizzes[id] = quiz;
+    const course = mockCourses.find((c) => c.id === quiz.courseId);
+    return delay({
+      id,
+      title: quiz.title,
+      description: quiz.description,
+      courseId: quiz.courseId,
+      courseName: course?.name ?? '',
+      questionCount: quiz.questions.length,
+    });
+  },
 
-  update: (id: number, quiz: CreateQuizDto) => api.put<void>(`/quizzes/${id}`, quiz),
+  // PUT /api/quizzes/{id}: Replaces the quiz with the edited version (the API answers 204 No Content)
+  update: (id: number, quiz: CreateQuizDto): Promise<void> => {
+    if (!USE_MOCK) return api.put<void>(`/quizzes/${id}`, quiz);
+    if (!mockEditableQuizzes[id]) return Promise.reject(new ApiError(404, 'Quiz not found.'));
+    mockEditableQuizzes[id] = quiz;
+    return delay(undefined);
+  },
 
   remove: (id: number) => api.delete(`/quizzes/${id}`),
 };

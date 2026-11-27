@@ -4,9 +4,14 @@
 
 import { api } from './api';
 import type { CourseDto, CreateCourseDto } from '../types/course';
+import { mockCourses } from '../mocks/courseMocks';
+
+const USE_MOCK = true; // TODO: set to false when CourseAPIController exists
 
 export const courseService = {
-  getAll: () => api.get<CourseDto[]>('/courses'),
+  // GET /api/courses: all courses (mock data until the API endpoint exists)
+  getAll: (): Promise<CourseDto[]> =>
+    USE_MOCK ? Promise.resolve(mockCourses) : api.get<CourseDto[]>('/courses'),
 
   getById: (id: number) => api.get<CourseDto>(`/courses/${id}`),
 
