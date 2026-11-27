@@ -1,34 +1,43 @@
-// App.tsx — the list of all pages (routes) in the app.
-// To add a page: create it in src/pages/ and add one <Route> line here.
+// App.tsx — the list of all pages (routes) in the app (Demo 10: "Modifying App.tsx").
+// To add a page: create it in src/pages/ and add one <Route> line in the right block below.
 
 import { Routes, Route } from 'react-router';
 import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import CourseListPage from './pages/CourseListPage';
-import DashboardPage from './pages/DashboardPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import WelcomePage from './pages/WelcomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import NotFoundPage from './pages/NotFoundPage';
+import DashboardPage from './pages/DashboardPage';
+import CourseListPage from './pages/CourseListPage';
 import TakeQuizPage from './pages/TakeQuizPage';
 import QuizResultPage from './pages/QuizResultPage';
+import NotFoundPage from './pages/NotFoundPage';
 
-function App() {
+export default function App() {
   return (
     <Routes>
-      {/* Every page inside this Route gets the navbar + panel from Layout */}
+      {/* Every page inside this Route gets the navbar and the panel from Layout */}
       <Route element={<Layout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/courses" element={<CourseListPage />} />
+        {/* Public pages: anyone can see them */}
+        <Route path="/" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+
+        {/* Protected routes: must be logged in (like [Authorize]) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/quizzes/:id/take" element={<TakeQuizPage />} />
+          <Route path="/quizzes/:id/result" element={<QuizResultPage />} />
+        </Route>
+
+        {/* Teacher-only routes (like [Authorize(Roles = "TEACHER")]) */}
+        <Route element={<ProtectedRoute role="TEACHER" />}>
+          <Route path="/courses" element={<CourseListPage />} />
+        </Route>
+
         {/* "*" = any URL that didn't match above */}
-        <Route path="/quizzes/:id/take" element={<TakeQuizPage />} />
-        <Route path="/quizzes/:id/result" element={<QuizResultPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );
 }
-
-export default App;
