@@ -1,6 +1,6 @@
 //Mockdata used before connecting to API
 
-import type { QuizForTakingDto } from "../types/quiz";
+import type { CreateQuizDto, QuizForTakingDto } from "../types/quiz";
 
 //What the student receives, questions WITHOUT the answer
 export const mockQuiz: QuizForTakingDto = {
@@ -27,3 +27,16 @@ export const mockCorrectAnswers: Record<number, string> = {
 
 //Course title for the mock result page (the real API gets it from the Course table)
 export const mockCourseTitle = 'Web applications';
+
+//The same quiz as mockQuiz, but in the shape the teacher edits (WITH correct answers)
+//Built from mockQuiz + mockCorrectAnswers so the two never get out of sync
+export const mockQuizForEdit: CreateQuizDto = {
+  title: mockQuiz.title,
+  description: mockQuiz.description,
+  courseId: 2, // ITPE3200 in mockCourses
+  questions: mockQuiz.questions.map((q) => ({
+    prompt: q.prompt,
+    correctAnswer: mockCorrectAnswers[q.id],
+    points: q.points,
+  })),
+};
