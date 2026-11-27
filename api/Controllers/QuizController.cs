@@ -1,20 +1,59 @@
+//TODO rename QuizAPIController
+
 using api.Models;
 using api.DAL;
 using api.Services;
 using api.ViewModels;
-// using api.DTO; 
+using api.DTO; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.VisualBasic;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace api.Controllers;
 
 
 [ApiController]     
-[Route("api/[controller]")]
+[Route("api/quizzes")]
 public class QuizAPIController : ControllerBase
 {
+    private readonly IQuizRepository _quizRepository;
+    private readonly ILogger<QuizAPIController> _logger;
+
+    public QuizAPIController(IQuizRepository quizRepository, ILogger<QuizAPIController> logger)
+    {
+        _quizRepository = quizRepository;
+        _logger = logger;
+    }
+
+   // Get ALL quizzes method
+   [HttpGet]
+   public async Task<IActionResult> QuizList()
+
+    // 1. ask the repo for all quizzes
+    // 2. optional error handling 404
+    // 3. turn each quiz into a quizDto
+    // 4. answer 200 OK with the list of QuizDtos
+    {
+        var quizzes = await _quizRepository.GetAllQuizzes();
+        if (quizzes == null)
+        {
+            _logger.LogError("[QuizAPIController] Quiz list not found while executing _quizRepository.GetAllQuizzes()");
+            return NotFound("Quiz list not found");
+        }
     
+        var quizDtos = quizzes.Select(quiz => new QuizDto
+        {
+            quizId = quiz.Id,
+            Title = quiz.Title,
+            Description = quiz.Description,
+            Course = quiz.Course.Id,
+            CourseName = quiz.Course.Name,
+            QuestionCount = quiz.Questions.Count
+        });
+        return Ok(quizDtos);
+    }
 }
 
 //TODO bring back authorize (following demo 9 does this) 
