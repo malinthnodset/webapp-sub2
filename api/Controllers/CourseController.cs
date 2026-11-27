@@ -1,6 +1,7 @@
-//TODO rename to CourseAPIController
+//TODO rename to CourseAPIController, remove unused using? 
 
 using api.DAL;
+using api.DTO;
 using Microsoft.AspNetCore.Mvc;
 using api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +27,8 @@ public class CourseAPIController : ControllerBase
     }
 
     [HttpGet]
-   public async Task<IActionResult> QuizList()
+    //[Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
+   public async Task<IActionResult> CourseList()
 
     {
         var courses = await _courseRepository.GetAllCourses();
@@ -43,6 +45,29 @@ public class CourseAPIController : ControllerBase
             Name = course.Name,
         });
         return Ok(quizDtos);
+    }
+
+    // POST: /Course/Create
+    [HttpPost("create")]
+    //TODO kikke på denne [ValidateAntiForgeryToken]
+    //TODO bring back --> [Authorize(Roles = "TEACHER")]
+    public async Task<IActionResult> Create([FromBody] CreateCourseDto createCourseDto)
+    {
+        if (createCourseDto == null)
+        {
+            return BadRequest("Course cannot be null");
+        }
+        var newCourse = new Course
+        {
+            Code = createCourseDto.Code,
+            Name = createCourseDto.Name
+        };
+        bool returnOk = await _courseRepository.Create(newCourse);
+        if (returnOk)
+            return CreatedAtAction(nameof(CourseList), new { id = newCourse.Id }, newCourse);
+
+        _logger.LogWarning("[CourseAPIController] Course creation failed {@course}", newCourse);
+        return StatusCode(500, "Internal server error");
     }
 }
 
