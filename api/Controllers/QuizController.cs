@@ -1,3 +1,5 @@
+//TODO rename QuizAPIController
+
 using api.Models;
 using api.DAL;
 using api.Services;
@@ -19,14 +21,14 @@ public class QuizAPIController : ControllerBase
     private readonly IQuizRepository _quizRepository;
     private readonly ILogger<QuizAPIController> _logger;
 
-    public QuizAPIController(IQuizRepository quizRepository, ILogger<QuizController> logger)
+    public QuizAPIController(IQuizRepository quizRepository, ILogger<QuizAPIController> logger)
     {
         _quizRepository = quizRepository;
         _logger = logger;
     }
 
    // Get ALL quizzes method
-   [HttpGet("quizlist")]
+   [HttpGet]
    public async Task<IActionResult> QuizList()
 
     // 1. ask the repo for all quizzes
@@ -46,9 +48,9 @@ public class QuizAPIController : ControllerBase
             quizId = quiz.Id,
             Title = quiz.Title,
             Description = quiz.Description,
-            Course = quiz.CourseId,
-            CourseName = quiz.Course,
-            QuestionCount = quiz.Questions //TODO check that this is correct
+            Course = quiz.Course.Id,
+            CourseName = quiz.Course.Name,
+            QuestionCount = quiz.Questions.Count
         });
         return Ok(quizDtos);
     }
