@@ -4,14 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "frontend": "vite --open",
+    "backend": "dotnet run --project ../api/api.csproj",
+    "watch": "dotnet watch --project ../api/api.csproj",
+    "dev": "concurrently -k -s first \"npm run backend\" \"npm run frontend\"",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
-    "bootstrap": "^5.3.9",
     "@tanstack/react-query": "^5.108.4",
+    "bootstrap": "^5.3.9",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router": "^8.5.3"
@@ -22,6 +25,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/devtools": "^0.8.3",
     "@vitejs/plugin-react": "^6.3.0",
+    "concurrently": "^10.0.7",
     "oxlint": "^1.94.0",
     "typescript": "~7.0.2",
     "vite": "^8.4.0",
