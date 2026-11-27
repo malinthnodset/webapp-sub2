@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import CourseListPage from './pages/CourseListPage';
+import CourseCreatePage from './pages/CourseCreatePage';
 import TakeQuizPage from './pages/TakeQuizPage';
 import QuizResultPage from './pages/QuizResultPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -33,6 +34,7 @@ export default function App() {
         {/* Teacher-only routes (like [Authorize(Roles = "TEACHER")]) */}
         <Route element={<ProtectedRoute role="TEACHER" />}>
           <Route path="/courses" element={<CourseListPage />} />
+          <Route path="/coursescreate" element={<CourseCreatePage />} />
         </Route>
 
         {/* "*" = any URL that didn't match above */}

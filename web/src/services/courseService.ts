@@ -4,7 +4,7 @@
 // Delete/create/update send the JWT token (getAuthHeaders), because the API only lets teachers do that.
 
 import { API_URL, ApiError, getAuthHeaders, handleResponse, mockDelay } from './api';
-import type { CourseDto } from '../types/course';
+import type { CourseDto, CreateCourseDto } from '../types/course';
 import { mockCourses } from '../mocks/courseMocks';
 
 const USE_MOCK = true; // TODO: set to false when the /api/courses endpoints exist in the API
@@ -31,4 +31,26 @@ export async function deleteCourse(courseId: number): Promise<void> {
     headers: getAuthHeaders(),
   });
   return handleResponse<void>(response);
+}
+// Course codes must be unique. The API should check this too and answer 400 with this message.
+function checkUniqueCode(code: string, ignoreId?: number) {
+  const taken = mockCourses.some((c) => c.code === code && c.id !== ignoreId);
+  if (taken) throw new ApiError(400, `A course with code ${code} already exists.`);
+}
+
+// POST /api/courses → the new course (with the id the database gave it)
+export async function createCourse(course: CreateCourseDto): Promise<CourseDto> {
+  if (USE_MOCK) {
+    checkUniqueCode(course.code);
+    const newCourse: CourseDto = { id: Math.max(0, ...mockCourses.map((c) => c.id)) + 1, ...course };
+    mockCourses.push(newCourse);
+    return mockDelay(newCourse);
+  }
+
+  const response = await fetch(`${API_URL}/api/courses`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(course),
+  });
+  return handleResponse<CourseDto>(response);
 }

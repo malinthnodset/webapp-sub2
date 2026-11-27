@@ -1,7 +1,8 @@
 // CourseListPage — the teacher's list of all courses: Read + Delete (Demo 7 and 8: ItemListPage.tsx).
-// Create (step 8) and Update (step 9) get their own pages; this page will link to them.
+// Create and Update have their own pages; this page links to them.
 
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Form, Alert, Spinner } from 'react-bootstrap';
 import CourseTable from '../components/CourseTable';
@@ -46,6 +47,7 @@ export default function CourseListPage() {
       <h1>Manage courses</h1>
 
       <div className="d-flex gap-2 mb-3">
+        <Link to="/coursescreate" className="btn btn-primary">+ New course</Link>
         <Button onClick={() => refetch()} variant="secondary" disabled={isLoading}>
           {isLoading ? 'Loading...' : 'Refresh courses'}
         </Button>
