@@ -9,6 +9,7 @@ namespace api.DTO
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
         public string CourseCode { get; set; } = string.Empty;
         public List<TakeQuizQuestionDto> Questions { get; set; } = new();
     }
