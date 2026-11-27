@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import CourseListPage from './pages/CourseListPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TakeQuizPage from './pages/TakeQuizPage';
 import QuizResultPage from './pages/QuizResultPage';
@@ -20,6 +21,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/courses" element={<CourseListPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         {/* "*" = any URL that didn't match above */}
         <Route path="/quizzes/:id/take" element={<TakeQuizPage />} />
         <Route path="/quizzes/:id/result" element={<QuizResultPage />} />

@@ -2,7 +2,7 @@
 // It calls login() from AuthContext, which calls authService and saves the token.
 
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { useAuth } from '../context/useAuth';
 
@@ -15,8 +15,9 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Set by ProtectedRoute (step 6): the page the user wanted before they were sent here
-  const state = location.state as { from?: string } | null;
+  
+// Set by ProtectedRoute (step 6: the page the user wanted) or by RegisterPage (a success message)
+  const state = location.state as { from?: string; message?: string } | null;
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault(); // stop the browser from reloading the page
@@ -40,6 +41,7 @@ export default function LoginPage() {
   return (
     <div className="mx-auto" style={{ maxWidth: '500px' }}>
       <h1>Log in</h1>
+      {state?.message && <Alert variant="success">{state.message}</Alert>}
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Form onSubmit={handleSubmit}>
@@ -78,6 +80,10 @@ export default function LoginPage() {
           )}
         </Button>
       </Form>
+
+      <p className="mt-3">
+        No account yet? <Link to="/register">Register here</Link>.
+      </p>
     </div>
   );
 }
