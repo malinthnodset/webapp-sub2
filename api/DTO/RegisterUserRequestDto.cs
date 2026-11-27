@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using api.Models;
 
 namespace api.DTO
 {
@@ -15,6 +16,7 @@ namespace api.DTO
         [Required]
         public string ConfirmPassword { get; set; } = string.Empty;
 
-        // TODO: hvordan definerer vi rolle? er student default og så lages lærerbrukere annerledes?
+        // Student is default - teachers are generated differently (?)
+        public Role Role { get; set; } = Role.STUDENT;
     }
 }
