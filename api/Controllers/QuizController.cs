@@ -2,13 +2,23 @@ using api.Models;
 using api.DAL;
 using api.Services;
 using api.ViewModels;
+// using api.DTO; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 
 namespace api.Controllers;
 
-[Authorize]     //If the user tries to access the quiz page without being logged in, they get redirected to the Login-path; fail-safe default and complete mediation
+
+[ApiController]     
+[Route("api/[controller]")]
+public class QuizAPIController : ControllerBase
+{
+    
+}
+
+//TODO bring back authorize (following demo 9 does this) 
+// [Authorize]//If the user tries to access the quiz page without being logged in, they get redirected to the Login-path; fail-safe default and complete mediation
 public class QuizController : Controller
 {
     // dependency injection - controller looks to interface repository files, and the service
