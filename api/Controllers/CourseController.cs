@@ -38,13 +38,9 @@ public class CourseAPIController : ControllerBase
     
         var quizDtos = courses.Select(course => new CourseDto
         {
-            QuizId = quiz.Id,
-            Title = quiz.Title,
-            Description = quiz.Description ?? string.Empty,
-            CourseId = quiz.CourseId,
-            //TODO Coursename and questioncount below cannot included yet bc include() not in repository
-            //CourseName = quiz.Course.Name,
-            //QuestionCount = quiz.Questions.Count
+            Id = course.Id,
+            Code = course.Code,
+            Name = course.Name,
         });
         return Ok(quizDtos);
     }
