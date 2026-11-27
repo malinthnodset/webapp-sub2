@@ -11,9 +11,9 @@ public class CourseController : Controller
 {
     // dependency injection - controller looks to interface repository files
     private readonly ICourseRepository _courseRepository; // create in DAL
-    private readonly ILogger<QuizController> _logger;
+    private readonly ILogger<QuizAPIController> _logger;
 
-    public CourseController(ILogger<QuizController> logger, ICourseRepository courseRepository)
+    public CourseController(ILogger<QuizAPIController> logger, ICourseRepository courseRepository)
     {
         _logger = logger;
         _courseRepository = courseRepository;
