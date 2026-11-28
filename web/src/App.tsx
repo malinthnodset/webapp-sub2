@@ -40,7 +40,6 @@ export default function App() {
           <Route path="/coursescreate" element={<CourseCreatePage />} />
           <Route path="/coursesupdate/:courseId" element={<CourseUpdatePage />} />
           <Route path="/quizzes/new" element={<QuizCreatePage />} />
-          <Route path="/quizzes/new" element={<QuizCreatePage />} />
           <Route path="/quizzes/:id/edit" element={<QuizUpdatePage />} />
         </Route>
 
