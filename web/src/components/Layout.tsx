@@ -1,43 +1,22 @@
 // Layout — the frame around every page (React version of _Layout.cshtml in Subapp 1).
+// Same order as Subapp 1: skip link, the pixel room behind everything, the navbar, then the page.
 // <Outlet /> is where the current page is drawn, like @RenderBody() in Razor.
 
-import { NavLink, Outlet, useNavigate } from 'react-router';
-import { authService } from '../services/authService';
+import { Outlet } from 'react-router';
+import NavMenu from './NavMenu';
+import Scene from './Scene';
 
-function Layout() {
-  const navigate = useNavigate();
-  const loggedIn = authService.isLoggedIn();
-
-  function handleLogout() {
-    authService.logout();
-    navigate('/login');
-  }
-
+export default function Layout() {
   return (
     <>
+      <a className="visually-hidden-focusable" href="#main">
+        Skip to content
+      </a>
+      
+      <Scene />
+
       <header>
-        <nav className="navbar pixel-nav px-3">
-          <NavLink to="/" className="navbar-brand">
-            Study Buddy
-          </NavLink>
-
-          <div className="d-flex gap-3 align-items-center">
-            <NavLink to="/courses" className="nav-link">
-              Courses
-            </NavLink>
-
-            {/* Conditional rendering: show Log out OR Log in depending on state */}
-            {loggedIn ? (
-              <button className="btn btn-outline-dark btn-sm" onClick={handleLogout}>
-                Log out
-              </button>
-            ) : (
-              <NavLink to="/login" className="nav-link">
-                Log in
-              </NavLink>
-            )}
-          </div>
-        </nav>
+        <NavMenu />
       </header>
 
       <main className="pixel-main" id="main">
@@ -48,5 +27,3 @@ function Layout() {
     </>
   );
 }
-
-export default Layout;
