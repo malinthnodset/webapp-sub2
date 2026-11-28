@@ -170,8 +170,12 @@ export default function DashboardPage() {
                       <span className="small text-muted">Not started</span>
                     )}
 
-                    {/* Students take quizzes. The button text depends on whether they tried before. */}
-                    {!isTeacher && (
+                    {/* Teachers edit quizzes, students take them (conditional rendering with a ternary) */}
+                    {isTeacher ? (
+                      <Link to={`/quizzes/${quiz.id}/edit`} className="btn btn-sm btn-outline-dark">
+                        Edit
+                      </Link>
+                    ) : (
                       <Link to={`/quizzes/${quiz.id}/take`} className="btn btn-sm btn-primary">
                         {quiz.attemptCount > 0 ? 'Try again' : 'Start'}
                       </Link>
