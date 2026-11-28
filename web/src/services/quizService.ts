@@ -5,7 +5,7 @@ import { api, ApiError } from './api';
 import type { QuizDto, QuizForTakingDto, CreateQuizDto } from '../types/quiz';
 import type { SubmitQuizDto, QuizResultDto, QuizAnswerResultDto, QuizAttemptHistoryDto } from '../types/attempt';
 import { mockQuiz, mockCorrectAnswers, mockCourseTitle, mockQuizForEdit } from '../mocks/quizMocks';
-import { mockCourses } from '../mocks/courseMocks';
+import { mockCourses, mockQuizzesByCourse } from '../mocks/courseMocks';
 
 const USE_MOCK = true; //TODO: set to false when the quiz endpoints exist in the API!!
 
@@ -136,5 +136,23 @@ export const quizService = {
     return delay(undefined);
   },
 
-  remove: (id: number) => api.delete(`/quizzes/${id}`),
-};
+
+    // DELETE /api/quizzes/{id}: deletes the quiz with its questions and attempts (the API answers 204 No Content)
+  remove: (id: number): Promise<void> => {
+    if (!USE_MOCK) return api.delete<void>(`/quizzes/${id}`);
+
+    let found = id in mockEditableQuizzes;
+    delete mockEditableQuizzes[id];
+
+    // Also remove it from the dashboard's mock lists, so it disappears there too
+    for (const quizzes of Object.values(mockQuizzesByCourse)) {
+      const index = quizzes.findIndex((q) => q.id === id);
+      if (index !== -1) {
+        quizzes.splice(index, 1);
+        found = true;
+      }
+    }
+
+    return found ? delay(undefined) : Promise.reject(new ApiError(404, 'Quiz not found.'));
+  },
+}
