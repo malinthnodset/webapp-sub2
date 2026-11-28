@@ -50,6 +50,7 @@ public class CourseAPIController : ControllerBase
     {
         if (createCourseDto == null)
         {
+            _logger.LogWarning("[CourseAPIController] Course creation failed, request body was null");
             return BadRequest("Course cannot be null");
         }
         var newCourse = new Course
@@ -81,8 +82,8 @@ public class CourseAPIController : ControllerBase
         var course = await _courseRepository.GetCourseById(id);
         if (course == null)
         {
-            _logger.LogWarning("Edit requested for course {id}, but it was not found", id);
-            return NotFound();
+            _logger.LogWarning("[CourseAPIController] Course {id} not found", id);
+            return NotFound("Course not found");
         }
 
         var courseDto = new CourseDto
