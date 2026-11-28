@@ -3,7 +3,7 @@
 // What the student sends when submitting a quiz
 export interface SubmitAnswerDto {
   questionId: number;
-  submittedAnswer: string;
+  submittedAnswer: string | null;
 }
 
 export interface SubmitQuizDto {

@@ -11,6 +11,6 @@ namespace api.DTO
         public required string token { get; set; } // init instead of set?
         public required string name { get; set; }
         public required string email { get; set; }
-        public required Role Role { get; set; } = Role.STUDENT;
+        public required Role Role { get; set; } = Role.STUDENT; // TODO: make it either student/teacher
     }
 }
