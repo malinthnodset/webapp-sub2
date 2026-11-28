@@ -14,6 +14,7 @@ import CourseUpdatePage from './pages/CourseUpdatePage';
 import TakeQuizPage from './pages/TakeQuizPage';
 import QuizResultPage from './pages/QuizResultPage';
 import NotFoundPage from './pages/NotFoundPage';
+import QuizCreatePage from './pages/QuizCreatePage';
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/courses" element={<CourseListPage />} />
           <Route path="/coursescreate" element={<CourseCreatePage />} />
           <Route path="/coursesupdate/:courseId" element={<CourseUpdatePage />} />
+           <Route path="/quizzes/new" element={<QuizCreatePage />} />
         </Route>
 
         {/* "*" = any URL that didn't match above */}
