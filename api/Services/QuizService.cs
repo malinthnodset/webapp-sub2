@@ -144,7 +144,7 @@ public class QuizService : IQuizService
             MaximumPoints = maximumPoints,
             CorrectAnswers = answers.Count(answer => answer.IsCorrect),
             TotalQuestions = answers.Count,
-            CatJustFreed = unlock.CasJustFreed,
+            CatJustFreed = unlock.CatJustFreed,
             NewFurnitureName = unlock.NewFurniture?.Name,
             NewFurnitureSlug = unlock.NewFurniture?.Slug
         };
