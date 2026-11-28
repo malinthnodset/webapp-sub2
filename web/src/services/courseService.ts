@@ -7,7 +7,7 @@ import { API_URL, ApiError, getAuthHeaders, handleResponse, mockDelay } from './
 import type { CourseDto, CreateCourseDto } from '../types/course';
 import { mockCourses } from '../mocks/courseMocks';
 
-const USE_MOCK = true; // TODO: set to false when the /api/courses endpoints exist in the API
+const USE_MOCK = false; // TODO: set to false when the /api/courses endpoints exist in the API
 
 // GET /api/courses → all courses
 export async function fetchCourses(): Promise<CourseDto[]> {

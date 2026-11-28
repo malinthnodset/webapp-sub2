@@ -24,7 +24,7 @@ public class CourseAPIController : ControllerBase
 
     //GET: /Course list
     [HttpGet]
-    //[Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
+    //TODO [Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
    public async Task<IActionResult> CourseList()
     {
         var courses = await _courseRepository.GetAllCourses();
@@ -50,6 +50,7 @@ public class CourseAPIController : ControllerBase
     {
         if (createCourseDto == null)
         {
+            _logger.LogWarning("[CourseAPIController] Course creation failed, request body was null");
             return BadRequest("Course cannot be null");
         }
         var newCourse = new Course
@@ -81,8 +82,8 @@ public class CourseAPIController : ControllerBase
         var course = await _courseRepository.GetCourseById(id);
         if (course == null)
         {
-            _logger.LogWarning("Edit requested for course {id}, but it was not found", id);
-            return NotFound();
+            _logger.LogWarning("[CourseAPIController] Course {id} not found", id);
+            return NotFound("Course not found");
         }
 
         var courseDto = new CourseDto
