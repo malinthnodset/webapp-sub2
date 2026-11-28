@@ -1,9 +1,10 @@
 // Layout — the frame around every page (React version of _Layout.cshtml in Subapp 1).
-// Same order as Subapp 1: skip link, the navbar, then the page. (Step 11 adds the pixel room.)
+// Same order as Subapp 1: skip link, the pixel room behind everything, the navbar, then the page.
 // <Outlet /> is where the current page is drawn, like @RenderBody() in Razor.
 
 import { Outlet } from 'react-router';
 import NavMenu from './NavMenu';
+import Scene from './Scene';
 
 export default function Layout() {
   return (
@@ -11,6 +12,8 @@ export default function Layout() {
       <a className="visually-hidden-focusable" href="#main">
         Skip to content
       </a>
+      
+      <Scene />
 
       <header>
         <NavMenu />

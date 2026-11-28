@@ -11,6 +11,7 @@ import AuthProvider from './context/AuthProvider';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/variables.css';
 import './styles/panel.css';
+import './styles/scene.css';
 import './styles/global.css';
 
 import App from './App';
