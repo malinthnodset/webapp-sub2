@@ -4,7 +4,7 @@
 // What the student sends when submitting a quiz
 export interface SubmitAnswerDto {
   questionId: number;
-  submittedAnswer: string;
+  submittedAnswer: string | null;
 }
 
 export interface SubmitQuizDto {
@@ -55,6 +55,7 @@ export interface QuizResultDto {
   answers: QuizAnswerResultDto[];
 }
 
+// TODO hva er dette til?? Finnes ingen DTO for dette
 // One row in the leaderboard
 export interface LeaderboardEntryDto {
   rank: number;
