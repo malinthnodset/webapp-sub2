@@ -12,7 +12,7 @@ public class FurnitureAPIController : ControllerBase
     private readonly IFurnitureService _furnitureService;
     private readonly ILogger<FurnitureAPIController> _logger;
 
-        public FurnitureAPIController(IFurnitureService furnitureService, ILogger<FurnitureAPIController> logger)
+    public FurnitureAPIController(IFurnitureService furnitureService, ILogger<FurnitureAPIController> logger)
     {
         _furnitureService = furnitureService;
         _logger = logger;
@@ -21,10 +21,9 @@ public class FurnitureAPIController : ControllerBase
     [HttpGet("scene")]
     public async Task<IActionResult> GetScene()
     {
-        var studentId = 1; //TODO Auth
+        var studentId = 1; //TODO from JWT when Sofie's auth is in
         
         var scene = await _furnitureService.GetSceneAsync(studentId);
         return Ok(scene);
-
     }
 }
