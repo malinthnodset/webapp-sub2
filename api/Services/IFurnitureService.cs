@@ -5,7 +5,7 @@ namespace api.Services;
 
 public class UnlockResult
 {
-    public bool CasJustFreed { get; set; }
+    public bool CatJustFreed { get; set; }
     public Furniture? NewFurniture { get; set; }
 }
 

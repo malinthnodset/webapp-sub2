@@ -24,7 +24,7 @@ public class CourseAPIController : ControllerBase
 
     //GET: /Course list
     [HttpGet]
-    //[Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
+    //TODO [Authorize(Roles = "TEACHER")] // Sørger for at det kun er lærere som kan nå denne siden, til og med når den er direkte skrevet inn i URL.
    public async Task<IActionResult> CourseList()
     {
         var courses = await _courseRepository.GetAllCourses();

@@ -16,27 +16,18 @@ public class FurnitureService : IFurnitureService
         _logger = logger;
     }
 
-    // Counts every attempt, so retaking a quiz also counts. Easier to test; change back to Distinct() later.
-    private Task<int> CountCompletedQuizzesAsync(int studentId) =>
-        _db.QuizAttempts.CountAsync(a => a.StudentId == studentId);
 
-    //TODO remove?  
-    //Count number of distinct quizzes the student has attempted (retaking the same quiz does not unlock anything).
-    //private Task<int> CountCompletedQuizzesAsync(int studentId) =>
-    //    _db.QuizAttempts
-    //        .Where(a => a.StudentId == studentId)
-    //        .Select(a => a.QuizId)
-    //        .Distinct()
-    //        .CountAsync();
+    private Task<int> CountAttemptedQuizzesAsync(int studentId) =>
+        _db.QuizAttempts.CountAsync(a => a.StudentId == studentId);
 
     public async Task<UnlockResult> CheckUnlockAsync(int studentId)
     {
         var result = new UnlockResult();
         try
         {
-            var completed = await CountCompletedQuizzesAsync(studentId);
-            var totalAttempts = await _db.QuizAttempts.CountAsync(a => a.StudentId == studentId);
-            result.CasJustFreed = totalAttempts == 1;
+            var completed = await CountAttemptedQuizzesAsync(studentId);
+            result.CatJustFreed = UnlockRules.CatIsFree(completed) && !UnlockRules.CatIsFree(completed - 1);
+
 
             var owned = await _db.StudentFurnitures.CountAsync(sf => sf.StudentId == studentId);
             if (!UnlockRules.ShouldUnlockFurniture(completed, owned))
@@ -79,7 +70,7 @@ public class FurnitureService : IFurnitureService
     {
         try
         {
-            var completed = await CountCompletedQuizzesAsync(studentId);
+            var completed = await CountAttemptedQuizzesAsync(studentId);
             var slugs = await _db.StudentFurnitures
                 .AsNoTracking()
                 .Where(sf => sf.StudentId == studentId)
