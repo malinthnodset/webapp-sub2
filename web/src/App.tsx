@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import CourseListPage from './pages/CourseListPage';
 import CourseCreatePage from './pages/CourseCreatePage';
+import CourseUpdatePage from './pages/CourseUpdatePage';
 import TakeQuizPage from './pages/TakeQuizPage';
 import QuizResultPage from './pages/QuizResultPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -35,6 +36,7 @@ export default function App() {
         <Route element={<ProtectedRoute role="TEACHER" />}>
           <Route path="/courses" element={<CourseListPage />} />
           <Route path="/coursescreate" element={<CourseCreatePage />} />
+          <Route path="/coursesupdate/:courseId" element={<CourseUpdatePage />} />
         </Route>
 
         {/* "*" = any URL that didn't match above */}

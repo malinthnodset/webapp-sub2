@@ -54,3 +54,33 @@ export async function createCourse(course: CreateCourseDto): Promise<CourseDto> 
   });
   return handleResponse<CourseDto>(response);
 }
+// GET /api/courses/{id} → one course. courseId is a string because it comes from the URL (useParams).
+export async function fetchCourseById(courseId: string): Promise<CourseDto> {
+  if (USE_MOCK) {
+    const course = mockCourses.find((c) => c.id === Number(courseId));
+    if (!course) throw new ApiError(404, 'Course not found.');
+    return mockDelay({ ...course });
+  }
+
+  const response = await fetch(`${API_URL}/api/courses/${courseId}`, { headers: getAuthHeaders() });
+  return handleResponse<CourseDto>(response);
+}
+
+// PUT /api/courses/{id} → 204 No Content
+export async function updateCourse(courseId: number, course: CreateCourseDto): Promise<void> {
+  if (USE_MOCK) {
+    const existing = mockCourses.find((c) => c.id === courseId);
+    if (!existing) throw new ApiError(404, 'Course not found.');
+    checkUniqueCode(course.code, courseId); // its own code doesn't count as taken
+    existing.code = course.code;
+    existing.name = course.name;
+    return mockDelay(undefined);
+  }
+
+  const response = await fetch(`${API_URL}/api/courses/${courseId}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(course),
+  });
+  return handleResponse<void>(response);
+}

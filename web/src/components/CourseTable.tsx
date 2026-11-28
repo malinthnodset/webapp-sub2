@@ -1,6 +1,7 @@
 // CourseTable — shows courses in a table (Demo 4: ItemTable.tsx).
-// The action buttons are only shown if the page passes onCourseDeleted (Demo 10: "Hiding UI Elements").
+// The Update/Delete buttons are only shown if the page passes onCourseDeleted (Demo 10: "Hiding UI Elements").
 
+import { Link } from 'react-router';
 import { Table, Button } from 'react-bootstrap';
 import type { CourseDto } from '../types/course';
 
@@ -26,6 +27,9 @@ export default function CourseTable({ courses, onCourseDeleted }: CourseTablePro
             <td>{course.name}</td>
             {onCourseDeleted && (
               <td className="text-center text-nowrap">
+                <Link to={`/coursesupdate/${course.id}`} className="btn btn-sm btn-primary me-2">
+                  Update
+                </Link>
                 <Button size="sm" variant="danger" onClick={() => onCourseDeleted(course.id)}>
                   Delete
                 </Button>
