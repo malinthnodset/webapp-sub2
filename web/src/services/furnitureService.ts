@@ -4,7 +4,7 @@
 import { API_URL, getAuthHeaders, handleResponse, mockDelay } from './api';
 import type { SceneDto } from '../types/furniture';
 
-const USE_MOCK = true; // TODO: set to false when GET /api/furniture/scene exists in the API
+const USE_MOCK = false; // TODO: set to false when GET /api/furniture/scene exists in the API
 
 // GET /api/furniture/scene → is the cat out of its box, and which furniture does the student own?
 export async function fetchScene(): Promise<SceneDto> {
