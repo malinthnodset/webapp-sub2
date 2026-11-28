@@ -6,6 +6,9 @@ namespace api.DTO
 {
     public class SubmitQuizAttemptDto
     {
+        // Malins take quiz needs Id - so therefore added now (temp?)
+        public int QuizId { get; set; }
+
         // The list of the answers - requires answering minimum 1 question
         [Required]
         [MinLength(1, ErrorMessage = "An attempt must include answers.")]

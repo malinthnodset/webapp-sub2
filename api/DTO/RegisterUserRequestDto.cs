@@ -20,6 +20,6 @@ namespace api.DTO
         public string ConfirmPassword { get; set; } = string.Empty;
 
         // Student is default - teachers are generated differently (?)
-        public Role Role { get; set; } = Role.STUDENT;
+        public Role Role { get; set; } = Role.STUDENT; // TODO: make it either student/teacher
     }
 }

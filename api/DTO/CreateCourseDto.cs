@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+// Used both for creating new and editing existing courses
+
 // Data Transfer Object - contains essentialy the same things as model, except navigation properties
 namespace api.DTO
 {
