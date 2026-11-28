@@ -4,7 +4,8 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { quizService } from '../services/quizService';
 import { Form, Button, Alert, Badge, Spinner, Row, Col } from 'react-bootstrap';
 import * as dashboardService from '../services/dashboardService';
 import { useAuth } from '../context/useAuth';
@@ -26,6 +27,28 @@ export default function DashboardPage() {
     queryKey: ['dashboard'],
     queryFn: dashboardService.fetchDashboard,
   });
+
+  const queryClient = useQueryClient();
+
+  // Delete a quiz (teachers only)
+  const deleteQuizMutation = useMutation({
+    mutationFn: quizService.remove,
+    onSuccess: (_result, quizId) => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] }); //Fetch the course list again
+      queryClient.removeQueries({ queryKey: ['quiz', quizId] });      //The deleted quiz is gone from the cache
+      queryClient.removeQueries({ queryKey: ['quiz-edit', quizId] });
+    },
+  });
+
+  //Ask before deleting: it can't be undone, and the students' attempts go too. Safety mech
+  const handleQuizDeleted = (quiz: DashboardQuizDto) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the quiz "${quiz.title}"? All attempts on it are deleted too.`,
+    );
+    if (confirmDelete) {
+      deleteQuizMutation.mutate(quiz.id);
+    }
+  };
 
   // Does a quiz match the chosen status?
   const matchesStatus = (quiz: DashboardQuizDto) => {
@@ -84,6 +107,12 @@ export default function DashboardPage() {
           <Button variant="link" className="p-0 align-baseline" onClick={() => refetch()}>Try again</Button>
         </Alert>
       )}
+
+      {deleteQuizMutation.error && (
+        <Alert variant="danger">Could not delete the quiz: {deleteQuizMutation.error.message}</Alert>
+      )}
+
+
 
       {/* ---------- Search and filters ---------- */}
       <Form className="dashboard-filters" role="search" onSubmit={(e) => e.preventDefault()}>
@@ -170,11 +199,21 @@ export default function DashboardPage() {
                       <span className="small text-muted">Not started</span>
                     )}
 
-                    {/* Teachers edit quizzes, students take them (conditional rendering with a ternary) */}
+                    {/* Teachers edit and deletes quizzes, students take them (conditional rendering with a ternary) */}
                     {isTeacher ? (
-                      <Link to={`/quizzes/${quiz.id}/edit`} className="btn btn-sm btn-outline-dark">
-                        Edit
-                      </Link>
+                      <div className="d-flex gap-2">
+                        <Link to={`/quizzes/${quiz.id}/edit`} className="btn btn-sm btn-outline-dark">
+                          Edit
+                        </Link>
+                        <Button
+                          size="sm"
+                          variant="outline-danger"
+                          onClick={() => handleQuizDeleted(quiz)}
+                          disabled={deleteQuizMutation.isPending}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     ) : (
                       <Link to={`/quizzes/${quiz.id}/take`} className="btn btn-sm btn-primary">
                         {quiz.attemptCount > 0 ? 'Try again' : 'Start'}
