@@ -5,6 +5,34 @@ body {
   min-height: 100vh;
   font-family: var(--pixel-font);
   color: var(--pixel-ink);
-  /* simple wall colour background until the pixel room (scene.css) is ported */
-  background: linear-gradient(var(--pixel-wall-top), var(--pixel-wall-bottom));
+  /* The pixel room (Scene.tsx + scene.css) is drawn behind everything; this colour shows while it loads */
+  background: var(--pixel-wall-bottom);
+}
+
+/* Give Bootstrap's buttons the pixel look from Subapp 1.
+   The code can then use normal react-bootstrap buttons, like in the demos: <Button variant="primary">.
+   Bootstrap 5 reads its button colours from these --bs-btn-* variables. */
+.btn-primary {
+  --bs-btn-bg: var(--pixel-teal);
+  --bs-btn-border-color: var(--pixel-ink);
+  --bs-btn-hover-bg: var(--pixel-teal-dark);
+  --bs-btn-hover-border-color: var(--pixel-ink);
+  --bs-btn-active-bg: var(--pixel-teal-dark);
+  --bs-btn-active-border-color: var(--pixel-ink);
+  --bs-btn-disabled-bg: var(--pixel-teal);
+  --bs-btn-disabled-border-color: var(--pixel-ink);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-outline-dark {
+  border-width: 3px;
+  box-shadow: 3px 3px 0 var(--pixel-ink);
+}
+
+/* Pressing a button pushes it "into" the page */
+.btn:active {
+  box-shadow: none;
+  transform: translate(2px, 2px);
 }

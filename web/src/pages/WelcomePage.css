@@ -1,0 +1,23 @@
+/* Styles only for WelcomePage. Copied from Subapp 1 (welcome.css), with class names prefixed "welcome__". */
+
+.welcome {
+  max-width: 700px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.welcome__features {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+}
+
+.welcome__features li {
+  margin: 0.5rem 0;
+}
+
+.welcome__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
