@@ -69,8 +69,13 @@ export default function DashboardPage() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="mb-0">My courses</h1>
-        {/* Only teachers can create courses (conditional rendering with &&) */}
-        {isTeacher && <Link to="/coursecreate" className="btn btn-primary">+ New course</Link>}
+        {/* Only teachers can create courses and quizzes (conditional rendering with &&) */}
+        {isTeacher && (
+          <div className="d-flex gap-2">
+            <Link to="/quizzes/new" className="btn btn-outline-primary">+ New quiz</Link>
+            <Link to="/coursescreate" className="btn btn-primary">+ New course</Link>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -147,7 +152,7 @@ export default function DashboardPage() {
 
               {isTeacher && (
                 <div className="p-2">
-                  <Link to={`/courseupdate/${course.id}`} className="btn btn-sm btn-outline-dark">Edit course</Link>
+                  <Link to={`/coursesupdate/${course.id}`} className="btn btn-sm btn-outline-dark">Edit course</Link>
                 </div>
               )}
 
