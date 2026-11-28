@@ -1,5 +1,5 @@
 using api.Models;
-using api.ViewModels;
+using api.DTO;
 
 namespace api.Services;
 
@@ -15,5 +15,5 @@ public interface IFurnitureService
     Task<UnlockResult> CheckUnlockAsync(int studentId);
 
     // What the room should look like for this student
-    Task<SceneViewModel> GetSceneAsync(int studentId);
+    Task<SceneDto> GetSceneAsync(int studentId);
 }

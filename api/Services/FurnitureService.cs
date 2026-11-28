@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using api.DAL;
 using api.Models;
-using api.ViewModels;
+using api.DTO;
 
 namespace api.Services;
 
@@ -20,7 +20,8 @@ public class FurnitureService : IFurnitureService
     private Task<int> CountCompletedQuizzesAsync(int studentId) =>
         _db.QuizAttempts.CountAsync(a => a.StudentId == studentId);
 
-    // Count number of distinct quizzes the student has attempted (retaking the same quiz does not unlock anything).
+    //TODO remove?  
+    //Count number of distinct quizzes the student has attempted (retaking the same quiz does not unlock anything).
     //private Task<int> CountCompletedQuizzesAsync(int studentId) =>
     //    _db.QuizAttempts
     //        .Where(a => a.StudentId == studentId)
@@ -74,7 +75,7 @@ public class FurnitureService : IFurnitureService
         return result;
     }
 
-    public async Task<SceneViewModel> GetSceneAsync(int studentId)
+    public async Task<SceneDto> GetSceneAsync(int studentId)
     {
         try
         {
@@ -86,7 +87,7 @@ public class FurnitureService : IFurnitureService
                 .Select(sf => sf.Furniture.Slug)
                 .ToListAsync();
 
-            return new SceneViewModel
+            return new SceneDto
             {
                 CatOutOfBox = UnlockRules.CatIsFree(completed),
                 FurnitureSlugs = slugs
@@ -95,7 +96,7 @@ public class FurnitureService : IFurnitureService
         catch (Exception ex)
         {
             _logger.LogError(ex, "[FurnitureService] Could not load the scene for the student {StudentId}", studentId);
-            return new SceneViewModel(); // empty room, but the site still works
+            return new SceneDto(); // empty room, but the site still works
         }
     }
 }
