@@ -207,6 +207,7 @@ public class QuizAPIController : ControllerBase
 
 
 
+/*
 /// Old controller ------------------------------
 
 
@@ -377,3 +378,4 @@ public class QuizAPIController : ControllerBase
 
 
 }
+*/
